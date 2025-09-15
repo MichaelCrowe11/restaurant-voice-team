@@ -8,6 +8,8 @@ import { promisify } from 'util';
 import fs from 'fs/promises';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import CollectiveIntelligence from './src/intelligence/CollectiveIntelligence.js';
+import PredictiveEngine from './src/intelligence/PredictiveEngine.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -28,6 +30,10 @@ const ELEVENLABS_BASE_URL = 'https://api.elevenlabs.io/v1';
 
 // Load agent configurations
 let agentConfigs = {};
+
+// Initialize Intelligence Systems
+const collectiveIntelligence = new CollectiveIntelligence();
+const predictiveEngine = new PredictiveEngine();
 
 async function loadAgentConfigs() {
     try {
@@ -188,6 +194,92 @@ app.post('/api/scenarios/:type', async (req, res) => {
     res.json(scenario);
 });
 
+// Intelligence API Endpoints
+
+// Predict customer needs
+app.post('/api/intelligence/predict', async (req, res) => {
+    const { customerId, context } = req.body;
+
+    try {
+        const predictions = await predictiveEngine.predictCustomerNeeds(customerId, context);
+
+        // Share with collective intelligence
+        collectiveIntelligence.processAgentCommunication('api', {
+            type: 'CUSTOMER_INTERACTION',
+            context: context,
+            outcome: { predictions }
+        });
+
+        res.json(predictions);
+    } catch (error) {
+        console.error('Prediction error:', error);
+        res.status(500).json({ error: 'Failed to generate predictions' });
+    }
+});
+
+// Get collective insights
+app.get('/api/intelligence/insights', async (req, res) => {
+    try {
+        const insights = collectiveIntelligence.generateInsights();
+        res.json(insights);
+    } catch (error) {
+        console.error('Insights error:', error);
+        res.status(500).json({ error: 'Failed to generate insights' });
+    }
+});
+
+// Forecast demand
+app.post('/api/intelligence/forecast', async (req, res) => {
+    const { timeframe = 'week' } = req.body;
+
+    try {
+        const forecast = await predictiveEngine.forecastDemand(timeframe);
+        res.json(forecast);
+    } catch (error) {
+        console.error('Forecast error:', error);
+        res.status(500).json({ error: 'Failed to generate forecast' });
+    }
+});
+
+// Optimize staffing
+app.post('/api/intelligence/optimize-staff', async (req, res) => {
+    const { constraints } = req.body;
+
+    try {
+        const optimization = await predictiveEngine.optimizeStaffing(constraints);
+        res.json(optimization);
+    } catch (error) {
+        console.error('Optimization error:', error);
+        res.status(500).json({ error: 'Failed to optimize staffing' });
+    }
+});
+
+// Detect anomalies
+app.post('/api/intelligence/anomaly', async (req, res) => {
+    const { metrics } = req.body;
+
+    try {
+        const anomaly = await predictiveEngine.detectAnomalies(metrics);
+        res.json(anomaly);
+    } catch (error) {
+        console.error('Anomaly detection error:', error);
+        res.status(500).json({ error: 'Failed to detect anomalies' });
+    }
+});
+
+// Agent learning endpoint
+app.post('/api/intelligence/learn', async (req, res) => {
+    const { agentId, interaction } = req.body;
+
+    try {
+        collectiveIntelligence.processAgentCommunication(agentId, interaction);
+        res.json({ success: true, message: 'Learning recorded' });
+    } catch (error) {
+        console.error('Learning error:', error);
+        res.status(500).json({ error: 'Failed to record learning' });
+    }
+});
+
 // Generate agent response based on personality
 async function generateAgentResponse(agent, message) {
     // In production, this would use GPT-4 or Claude with the agent's prompt
@@ -339,6 +431,14 @@ async function startServer() {
 ║  GET  /api/agents           - List all agents                                ║
 ║  POST /api/agents/:id/test  - Test agent voice                               ║
 ║  POST /api/agents/:id/deploy - Deploy to ConvAI                              ║
+║                                                                               ║
+║  Intelligence Features:                                                       ║
+║  POST /api/intelligence/predict - Predict customer needs                      ║
+║  GET  /api/intelligence/insights - Get collective insights                    ║
+║  POST /api/intelligence/forecast - Forecast demand                            ║
+║  POST /api/intelligence/optimize-staff - Optimize staffing                    ║
+║  POST /api/intelligence/anomaly - Detect anomalies                            ║
+║  POST /api/intelligence/learn - Record agent learning                         ║
 ║                                                                               ║
 ║  Web Interface: http://localhost:${PORT}/test-voice-agents.html                 ║
 ║                                                                               ║

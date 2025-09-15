@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🧠 Restaurant Intelligence Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 20px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .card h2 {
+            color: #333;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card h2 .icon {
+            font-size: 1.5em;
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #666;
+            font-weight: 500;
+        }
+
+        .input-group input,
+        .input-group select,
+        .input-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        .input-group input:focus,
+        .input-group select:focus,
+        .input-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: opacity 0.3s;
+            width: 100%;
+        }
+
+        button:hover {
+            opacity: 0.9;
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f5f5f5;
+            border-radius: 8px;
+            min-height: 100px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .result pre {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            font-size: 12px;
+            color: #333;
+        }
+
+        .status {
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            display: inline-block;
+            margin-bottom: 10px;
+        }
+
+        .status.success {
+            background: #4caf50;
+            color: white;
+        }
+
+        .status.error {
+            background: #f44336;
+            color: white;
+        }
+
+        .status.loading {
+            background: #ff9800;
+            color: white;
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+
+        .metric-item {
+            padding: 10px;
+            background: #f9f9f9;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .metric-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .metric-label {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .prediction-item {
+            padding: 10px;
+            margin: 10px 0;
+            background: #f0f4ff;
+            border-left: 4px solid #667eea;
+            border-radius: 4px;
+        }
+
+        .confidence-bar {
+            height: 8px;
+            background: #e0e0e0;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 5px;
+        }
+
+        .confidence-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4caf50, #8bc34a);
+            transition: width 0.5s ease;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧠 Restaurant Intelligence Dashboard</h1>
+
+        <div class="dashboard">
+            <!-- Customer Prediction Card -->
+            <div class="card">
+                <h2><span class="icon">🔮</span> Customer Predictions</h2>
+
+                <div class="input-group">
+                    <label>Customer ID</label>
+                    <input type="text" id="customerId" placeholder="e.g., CUST001" value="CUST001">
+                </div>
+
+                <div class="input-group">
+                    <label>Context</label>
+                    <textarea id="context" rows="3" placeholder="Enter context (JSON format)">{
+  "dayOfWeek": 5,
+  "hour": 19,
+  "weather": "sunny",
+  "specialEvent": false
+}</textarea>
+                </div>
+
+                <button onclick="predictCustomerNeeds()">🎯 Predict Needs</button>
+
+                <div class="result" id="predictionResult"></div>
+            </div>
+
+            <!-- Demand Forecast Card -->
+            <div class="card">
+                <h2><span class="icon">📊</span> Demand Forecast</h2>
+
+                <div class="input-group">
+                    <label>Timeframe</label>
+                    <select id="forecastTimeframe">
+                        <option value="day">Next Day</option>
+                        <option value="week" selected>Next Week</option>
+                        <option value="month">Next Month</option>
+                    </select>
+                </div>
+
+                <button onclick="forecastDemand()">📈 Generate Forecast</button>
+
+                <div class="result" id="forecastResult"></div>
+            </div>
+
+            <!-- Collective Insights Card -->
+            <div class="card">
+                <h2><span class="icon">💡</span> Collective Insights</h2>
+
+                <button onclick="getInsights()">🧩 Get Current Insights</button>
+
+                <div class="result" id="insightsResult"></div>
+            </div>
+
+            <!-- Staff Optimization Card -->
+            <div class="card">
+                <h2><span class="icon">👥</span> Staff Optimization</h2>
+
+                <div class="input-group">
+                    <label>Max Staff Budget ($)</label>
+                    <input type="number" id="staffBudget" value="5000" min="0">
+                </div>
+
+                <div class="input-group">
+                    <label>Minimum Service Level (%)</label>
+                    <input type="number" id="serviceLevel" value="85" min="0" max="100">
+                </div>
+
+                <button onclick="optimizeStaffing()">⚙️ Optimize Schedule</button>
+
+                <div class="result" id="staffResult"></div>
+            </div>
+
+            <!-- Anomaly Detection Card -->
+            <div class="card">
+                <h2><span class="icon">🚨</span> Anomaly Detection</h2>
+
+                <div class="metrics-grid">
+                    <div class="input-group">
+                        <label>Wait Time (min)</label>
+                        <input type="number" id="waitTime" value="15" min="0">
+                    </div>
+                    <div class="input-group">
+                        <label>Order Errors</label>
+                        <input type="number" id="orderErrors" value="2" min="0">
+                    </div>
+                    <div class="input-group">
+                        <label>Staff Count</label>
+                        <input type="number" id="staffCount" value="8" min="0">
+                    </div>
+                    <div class="input-group">
+                        <label>Revenue ($)</label>
+                        <input type="number" id="revenue" value="3500" min="0">
+                    </div>
+                </div>
+
+                <button onclick="detectAnomalies()">🔍 Detect Anomalies</button>
+
+                <div class="result" id="anomalyResult"></div>
+            </div>
+
+            <!-- Learning Recorder Card -->
+            <div class="card">
+                <h2><span class="icon">📚</span> Record Learning</h2>
+
+                <div class="input-group">
+                    <label>Agent ID</label>
+                    <select id="learningAgent">
+                        <option value="sophia">Sophia (Head Chef)</option>
+                        <option value="marcus">Marcus (Front Manager)</option>
+                        <option value="isabella">Isabella (Sommelier)</option>
+                        <option value="raj">Raj (Sous Chef)</option>
+                        <option value="elena">Elena (Pastry Chef)</option>
+                    </select>
+                </div>
+
+                <div class="input-group">
+                    <label>Interaction Type</label>
+                    <select id="interactionType">
+                        <option value="CUSTOMER_INTERACTION">Customer Interaction</option>
+                        <option value="CRISIS_HANDLED">Crisis Handled</option>
+                        <option value="SUCCESS_PATTERN">Success Pattern</option>
+                        <option value="COLLABORATIVE_SOLUTION">Collaborative Solution</option>
+                    </select>
+                </div>
+
+                <div class="input-group">
+                    <label>Details</label>
+                    <textarea id="learningDetails" rows="3" placeholder="Describe the interaction...">{
+  "situation": "Rush hour service",
+  "action": "Expedited special orders",
+  "outcome": { "satisfaction": 0.95 }
+}</textarea>
+                </div>
+
+                <button onclick="recordLearning()">💾 Record Learning</button>
+
+                <div class="result" id="learningResult"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:3000/api';
+
+        function showStatus(elementId, status, message) {
+            const element = document.getElementById(elementId);
+            const statusClass = status === 'loading' ? 'loading' :
+                              status === 'success' ? 'success' : 'error';
+
+            element.innerHTML = `
+                <span class="status ${statusClass}">${status.toUpperCase()}</span>
+                <pre>${message}</pre>
+            `;
+        }
+
+        async function predictCustomerNeeds() {
+            const customerId = document.getElementById('customerId').value;
+            const contextText = document.getElementById('context').value;
+
+            try {
+                showStatus('predictionResult', 'loading', 'Generating predictions...');
+
+                const context = JSON.parse(contextText);
+                const response = await fetch(`${API_BASE}/intelligence/predict`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ customerId, context })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) throw new Error(data.error);
+
+                // Format predictions nicely
+                let html = '<div>';
+
+                if (data.predictions) {
+                    Object.entries(data.predictions).forEach(([key, value]) => {
+                        html += `<div class="prediction-item">
+                            <strong>${key}:</strong> ${JSON.stringify(value, null, 2)}
+                            ${value.confidence ? `
+                                <div class="confidence-bar">
+                                    <div class="confidence-fill" style="width: ${value.confidence * 100}%"></div>
+                                </div>
+                                <small>Confidence: ${(value.confidence * 100).toFixed(1)}%</small>
+                            ` : ''}
+                        </div>`;
+                    });
+                }
+
+                if (data.actions && data.actions.length > 0) {
+                    html += '<h4 style="margin-top: 15px;">Recommended Actions:</h4>';
+                    data.actions.forEach(action => {
+                        html += `<div class="prediction-item">
+                            <strong>${action.type}</strong> (${action.priority} priority)<br>
+                            Agent: ${action.agent}<br>
+                            Action: ${action.action}
+                        </div>`;
+                    });
+                }
+
+                html += '</div>';
+
+                showStatus('predictionResult', 'success', 'Predictions generated');
+                document.getElementById('predictionResult').innerHTML += html;
+
+            } catch (error) {
+                showStatus('predictionResult', 'error', error.message);
+            }
+        }
+
+        async function forecastDemand() {
+            const timeframe = document.getElementById('forecastTimeframe').value;
+
+            try {
+                showStatus('forecastResult', 'loading', 'Generating forecast...');
+
+                const response = await fetch(`${API_BASE}/intelligence/forecast`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ timeframe })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) throw new Error(data.error);
+
+                showStatus('forecastResult', 'success', JSON.stringify(data, null, 2));
+
+            } catch (error) {
+                showStatus('forecastResult', 'error', error.message);
+            }
+        }
+
+        async function getInsights() {
+            try {
+                showStatus('insightsResult', 'loading', 'Gathering insights...');
+
+                const response = await fetch(`${API_BASE}/intelligence/insights`);
+                const data = await response.json();
+
+                if (!response.ok) throw new Error(data.error);
+
+                showStatus('insightsResult', 'success', JSON.stringify(data, null, 2));
+
+            } catch (error) {
+                showStatus('insightsResult', 'error', error.message);
+            }
+        }
+
+        async function optimizeStaffing() {
+            const budget = document.getElementById('staffBudget').value;
+            const serviceLevel = document.getElementById('serviceLevel').value;
+
+            try {
+                showStatus('staffResult', 'loading', 'Optimizing staff schedule...');
+
+                const response = await fetch(`${API_BASE}/intelligence/optimize-staff`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        constraints: {
+                            maxBudget: parseFloat(budget),
+                            minServiceLevel: parseFloat(serviceLevel) / 100
+                        }
+                    })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) throw new Error(data.error);
+
+                showStatus('staffResult', 'success', JSON.stringify(data, null, 2));
+
+            } catch (error) {
+                showStatus('staffResult', 'error', error.message);
+            }
+        }
+
+        async function detectAnomalies() {
+            const metrics = {
+                waitTime: parseFloat(document.getElementById('waitTime').value),
+                orderErrors: parseInt(document.getElementById('orderErrors').value),
+                staffCount: parseInt(document.getElementById('staffCount').value),
+                revenue: parseFloat(document.getElementById('revenue').value)
+            };
+
+            try {
+                showStatus('anomalyResult', 'loading', 'Analyzing metrics...');
+
+                const response = await fetch(`${API_BASE}/intelligence/anomaly`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ metrics })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) throw new Error(data.error);
+
+                let resultHtml = '';
+                if (data.detected) {
+                    resultHtml = `
+                        <div style="color: #f44336; font-weight: bold;">
+                            ⚠️ ANOMALY DETECTED!
+                        </div>
+                        <div>Score: ${data.score.toFixed(2)}</div>
+                        <div>Type: ${data.type}</div>
+                        <div>Severity: ${data.severity}</div>
+                        <div>Recommendations: ${JSON.stringify(data.recommendations, null, 2)}</div>
+                    `;
+                } else {
+                    resultHtml = '<div style="color: #4caf50;">✅ No anomalies detected - all systems normal</div>';
+                }
+
+                showStatus('anomalyResult', 'success', resultHtml);
+
+            } catch (error) {
+                showStatus('anomalyResult', 'error', error.message);
+            }
+        }
+
+        async function recordLearning() {
+            const agentId = document.getElementById('learningAgent').value;
+            const type = document.getElementById('interactionType').value;
+            const detailsText = document.getElementById('learningDetails').value;
+
+            try {
+                showStatus('learningResult', 'loading', 'Recording learning...');
+
+                const details = JSON.parse(detailsText);
+                const interaction = {
+                    type,
+                    context: details,
+                    outcome: details.outcome || {},
+                    timestamp: new Date().toISOString()
+                };
+
+                const response = await fetch(`${API_BASE}/intelligence/learn`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ agentId, interaction })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) throw new Error(data.error);
+
+                showStatus('learningResult', 'success',
+                    `✅ Learning recorded successfully for ${agentId}\n${JSON.stringify(data, null, 2)}`);
+
+            } catch (error) {
+                showStatus('learningResult', 'error', error.message);
+            }
+        }
+
+        // Auto-refresh insights every 30 seconds
+        setInterval(() => {
+            if (document.visibilityState === 'visible') {
+                console.log('Auto-refreshing insights...');
+                // Optionally auto-refresh insights
+            }
+        }, 30000);
+    </script>
+</body>
+</html>
