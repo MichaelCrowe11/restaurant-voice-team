@@ -1,0 +1,792 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Restaurant Voice Agents - Transform Your Restaurant with AI-Powered Staff</title>
+    <meta name="description" content="Deploy 11 ML-powered voice agents with unique personalities to revolutionize your restaurant operations. Powered by ElevenLabs ConvAI.">
+
+    <!-- Open Graph Tags -->
+    <meta property="og:title" content="Restaurant Voice Agents - AI Staff for Modern Restaurants">
+    <meta property="og:description" content="11 specialized AI voice agents with scientifically-backed personalities for complete restaurant management">
+    <meta property="og:image" content="https://restaurant-voice-agents.com/preview.jpg">
+    <meta property="og:url" content="https://restaurant-voice-agents.com">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #667eea;
+            --secondary: #764ba2;
+            --accent: #f093fb;
+            --dark: #1a1a2e;
+            --light: #f5f5f5;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            overflow-x: hidden;
+        }
+
+        /* Hero Section */
+        .hero {
+            min-height: 100vh;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            width: 200%;
+            height: 200%;
+            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            animation: float 20s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            33% { transform: translate(-30px, -30px) rotate(1deg); }
+            66% { transform: translate(30px, -20px) rotate(-1deg); }
+        }
+
+        .hero-content {
+            text-align: center;
+            color: white;
+            padding: 2rem;
+            max-width: 1200px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero h1 {
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            margin-bottom: 1.5rem;
+            font-weight: 700;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+            animation: fadeInUp 1s ease;
+        }
+
+        .hero .subtitle {
+            font-size: clamp(1.2rem, 2vw, 1.5rem);
+            margin-bottom: 3rem;
+            opacity: 0.95;
+            animation: fadeInUp 1s ease 0.2s both;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 1.5rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            animation: fadeInUp 1s ease 0.4s both;
+        }
+
+        .btn {
+            padding: 1rem 2.5rem;
+            font-size: 1.1rem;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: white;
+            color: var(--primary);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: white;
+            border: 2px solid white;
+        }
+
+        .btn-secondary:hover {
+            background: white;
+            color: var(--primary);
+        }
+
+        /* Stats Section */
+        .stats {
+            padding: 4rem 2rem;
+            background: white;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 3rem;
+            max-width: 1200px;
+            margin: -4rem auto 4rem;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.1);
+            position: relative;
+            z-index: 10;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 3rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 1.1rem;
+        }
+
+        /* Agents Grid */
+        .agents-section {
+            padding: 5rem 2rem;
+            background: #f8f9fa;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 4rem;
+        }
+
+        .section-header h2 {
+            font-size: clamp(2rem, 4vw, 3rem);
+            margin-bottom: 1rem;
+            color: var(--dark);
+        }
+
+        .section-header p {
+            font-size: 1.2rem;
+            color: #666;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .agents-preview {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .agent-preview-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+            transition: all 0.3s;
+            text-align: center;
+        }
+
+        .agent-preview-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        }
+
+        .agent-emoji {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .agent-name {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--dark);
+            margin-bottom: 0.5rem;
+        }
+
+        .agent-role {
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+
+        .agent-traits {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .trait-tag {
+            background: linear-gradient(135deg, #f0f4ff, #fff);
+            color: var(--primary);
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+        }
+
+        /* Features Section */
+        .features {
+            padding: 5rem 2rem;
+            background: white;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 3rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .feature {
+            text-align: center;
+        }
+
+        .feature-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 1.5rem;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+        }
+
+        .feature h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: var(--dark);
+        }
+
+        .feature p {
+            color: #666;
+            line-height: 1.8;
+        }
+
+        /* Demo Section */
+        .demo {
+            padding: 5rem 2rem;
+            background: linear-gradient(135deg, #f0f4ff, #fff);
+        }
+
+        .demo-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            align-items: center;
+        }
+
+        .demo-content h2 {
+            font-size: 2.5rem;
+            margin-bottom: 1.5rem;
+            color: var(--dark);
+        }
+
+        .demo-content p {
+            color: #666;
+            margin-bottom: 2rem;
+            line-height: 1.8;
+        }
+
+        .demo-video {
+            background: white;
+            padding: 2rem;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.1);
+        }
+
+        .video-placeholder {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            height: 300px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 3rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .video-placeholder:hover {
+            transform: scale(1.02);
+        }
+
+        /* Pricing Section */
+        .pricing {
+            padding: 5rem 2rem;
+            background: white;
+        }
+
+        .pricing-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            max-width: 1000px;
+            margin: 3rem auto;
+        }
+
+        .pricing-card {
+            background: white;
+            border: 2px solid #eee;
+            border-radius: 20px;
+            padding: 3rem 2rem;
+            text-align: center;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .pricing-card.featured {
+            border-color: var(--primary);
+            transform: scale(1.05);
+            box-shadow: 0 20px 60px rgba(102, 126, 234, 0.2);
+        }
+
+        .pricing-card.featured::before {
+            content: 'MOST POPULAR';
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 0.3rem 1.5rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .plan-name {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: var(--dark);
+        }
+
+        .plan-price {
+            font-size: 3rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.5rem;
+        }
+
+        .plan-price span {
+            font-size: 1.2rem;
+            color: #666;
+        }
+
+        .plan-features {
+            list-style: none;
+            margin: 2rem 0;
+        }
+
+        .plan-features li {
+            padding: 0.8rem 0;
+            color: #666;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .plan-features li:last-child {
+            border-bottom: none;
+        }
+
+        /* Footer */
+        footer {
+            background: var(--dark);
+            color: white;
+            padding: 3rem 2rem;
+            text-align: center;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .footer-links a {
+            color: white;
+            text-decoration: none;
+            opacity: 0.8;
+            transition: opacity 0.3s;
+        }
+
+        .footer-links a:hover {
+            opacity: 1;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .demo-container {
+                grid-template-columns: 1fr;
+            }
+
+            .cta-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .btn {
+                width: 100%;
+                max-width: 300px;
+            }
+        }
+
+        /* Floating Action Button */
+        .fab {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            cursor: pointer;
+            transition: all 0.3s;
+            z-index: 1000;
+        }
+
+        .fab:hover {
+            transform: scale(1.1);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.4);
+        }
+    </style>
+</head>
+<body>
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <h1>🍽️ Restaurant Voice Agents</h1>
+            <p class="subtitle">11 ML-Powered AI Staff Members with Unique Personalities<br>Transform Your Restaurant Operations Today</p>
+
+            <div class="cta-buttons">
+                <a href="#demo" class="btn btn-primary">🎤 See Live Demo</a>
+                <a href="#agents" class="btn btn-secondary">Meet Your Team</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="stats">
+        <div class="stat">
+            <div class="stat-number">11</div>
+            <div class="stat-label">Specialized Agents</div>
+        </div>
+        <div class="stat">
+            <div class="stat-number">&lt;100ms</div>
+            <div class="stat-label">Voice Response Time</div>
+        </div>
+        <div class="stat">
+            <div class="stat-number">85%+</div>
+            <div class="stat-label">Personality Accuracy</div>
+        </div>
+        <div class="stat">
+            <div class="stat-number">24/7</div>
+            <div class="stat-label">Always Available</div>
+        </div>
+    </section>
+
+    <!-- Agents Preview -->
+    <section class="agents-section" id="agents">
+        <div class="section-header">
+            <h2>Meet Your AI Restaurant Team</h2>
+            <p>Each agent has scientifically-backed personality traits and specialized expertise</p>
+        </div>
+
+        <div class="agents-preview">
+            <div class="agent-preview-card">
+                <div class="agent-emoji">🍳</div>
+                <div class="agent-name">Chef Sophia</div>
+                <div class="agent-role">Head Chef</div>
+                <div class="agent-traits">
+                    <span class="trait-tag">Italian</span>
+                    <span class="trait-tag">Passionate</span>
+                    <span class="trait-tag">Creative</span>
+                </div>
+            </div>
+
+            <div class="agent-preview-card">
+                <div class="agent-emoji">🎯</div>
+                <div class="agent-name">Marcus</div>
+                <div class="agent-role">Front Manager</div>
+                <div class="agent-traits">
+                    <span class="trait-tag">Leader</span>
+                    <span class="trait-tag">Diplomatic</span>
+                    <span class="trait-tag">Motivator</span>
+                </div>
+            </div>
+
+            <div class="agent-preview-card">
+                <div class="agent-emoji">🍷</div>
+                <div class="agent-name">Isabella</div>
+                <div class="agent-role">Sommelier</div>
+                <div class="agent-traits">
+                    <span class="trait-tag">French</span>
+                    <span class="trait-tag">Sophisticated</span>
+                    <span class="trait-tag">Expert</span>
+                </div>
+            </div>
+
+            <div class="agent-preview-card">
+                <div class="agent-emoji">⚡</div>
+                <div class="agent-name">Diego</div>
+                <div class="agent-role">Expediter</div>
+                <div class="agent-traits">
+                    <span class="trait-tag">Fast</span>
+                    <span class="trait-tag">Precise</span>
+                    <span class="trait-tag">Energetic</span>
+                </div>
+            </div>
+
+            <div class="agent-preview-card">
+                <div class="agent-emoji">👋</div>
+                <div class="agent-name">Amara</div>
+                <div class="agent-role">Host</div>
+                <div class="agent-traits">
+                    <span class="trait-tag">Warm</span>
+                    <span class="trait-tag">Southern</span>
+                    <span class="trait-tag">Intuitive</span>
+                </div>
+            </div>
+
+            <div class="agent-preview-card">
+                <div class="agent-emoji">💻</div>
+                <div class="agent-name">Oliver</div>
+                <div class="agent-role">Tech Support</div>
+                <div class="agent-traits">
+                    <span class="trait-tag">Logical</span>
+                    <span class="trait-tag">Patient</span>
+                    <span class="trait-tag">Problem-Solver</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features">
+        <div class="section-header">
+            <h2>Powered by Advanced Technology</h2>
+            <p>State-of-the-art AI meets restaurant industry expertise</p>
+        </div>
+
+        <div class="features-grid">
+            <div class="feature">
+                <div class="feature-icon">🧠</div>
+                <h3>ML-Enhanced Personalities</h3>
+                <p>Big Five personality traits from 1M+ assessments, ensuring authentic and consistent character behaviors</p>
+            </div>
+
+            <div class="feature">
+                <div class="feature-icon">🎤</div>
+                <h3>ElevenLabs Voice Synthesis</h3>
+                <p>Natural, human-like voices with unique accents and speaking styles for each agent</p>
+            </div>
+
+            <div class="feature">
+                <div class="feature-icon">📊</div>
+                <h3>Industry Data Training</h3>
+                <p>Trained on thousands of restaurant interactions, reviews, and hospitality best practices</p>
+            </div>
+
+            <div class="feature">
+                <div class="feature-icon">⚡</div>
+                <h3>Real-Time Response</h3>
+                <p>Sub-100ms latency ensures natural conversation flow with no awkward delays</p>
+            </div>
+
+            <div class="feature">
+                <div class="feature-icon">🔗</div>
+                <h3>POS Integration</h3>
+                <p>Connect with Square, Toast, and other popular restaurant management systems</p>
+            </div>
+
+            <div class="feature">
+                <div class="feature-icon">📈</div>
+                <h3>Analytics Dashboard</h3>
+                <p>Track performance, customer satisfaction, and operational insights in real-time</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Demo Section -->
+    <section class="demo" id="demo">
+        <div class="demo-container">
+            <div class="demo-content">
+                <h2>See Them in Action</h2>
+                <p>Watch how our AI agents handle real restaurant scenarios with personality and expertise. From dinner rush coordination to wine pairing recommendations, experience the future of restaurant management.</p>
+
+                <a href="/test-voice-agents.html" class="btn btn-primary">Try Live Demo</a>
+            </div>
+
+            <div class="demo-video">
+                <div class="video-placeholder" onclick="playDemo()">
+                    ▶️
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing Section -->
+    <section class="pricing" id="pricing">
+        <div class="section-header">
+            <h2>Simple, Transparent Pricing</h2>
+            <p>Choose the plan that fits your restaurant</p>
+        </div>
+
+        <div class="pricing-cards">
+            <div class="pricing-card">
+                <div class="plan-name">Starter</div>
+                <div class="plan-price">$99<span>/month</span></div>
+                <ul class="plan-features">
+                    <li>3 Voice Agents</li>
+                    <li>1,000 conversations/month</li>
+                    <li>Basic analytics</li>
+                    <li>Email support</li>
+                </ul>
+                <a href="#" class="btn btn-secondary" style="width: 100%;">Get Started</a>
+            </div>
+
+            <div class="pricing-card featured">
+                <div class="plan-name">Professional</div>
+                <div class="plan-price">$299<span>/month</span></div>
+                <ul class="plan-features">
+                    <li>All 11 Voice Agents</li>
+                    <li>Unlimited conversations</li>
+                    <li>Advanced analytics</li>
+                    <li>POS integration</li>
+                    <li>Priority support</li>
+                </ul>
+                <a href="#" class="btn btn-primary" style="width: 100%;">Get Started</a>
+            </div>
+
+            <div class="pricing-card">
+                <div class="plan-name">Enterprise</div>
+                <div class="plan-price">Custom</div>
+                <ul class="plan-features">
+                    <li>Custom agent personalities</li>
+                    <li>Multiple locations</li>
+                    <li>White-label option</li>
+                    <li>Dedicated support</li>
+                    <li>On-premise deployment</li>
+                </ul>
+                <a href="#" class="btn btn-secondary" style="width: 100%;">Contact Sales</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <div class="footer-links">
+                <a href="https://github.com/MichaelCrowe11/restaurant-voice-team">GitHub</a>
+                <a href="/docs">Documentation</a>
+                <a href="/api">API</a>
+                <a href="mailto:support@restaurant-voice-agents.com">Support</a>
+                <a href="/privacy">Privacy</a>
+                <a href="/terms">Terms</a>
+            </div>
+            <p>&copy; 2025 Restaurant Voice Agents. Powered by ElevenLabs ConvAI & ML Research.</p>
+        </div>
+    </footer>
+
+    <!-- Floating Action Button -->
+    <div class="fab" onclick="openChat()">💬</div>
+
+    <script>
+        // Smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+
+        // Play demo video
+        function playDemo() {
+            alert('Demo video would play here. In production, this would show actual agent interactions.');
+            // In production, integrate with YouTube or Vimeo embed
+        }
+
+        // Open chat widget
+        function openChat() {
+            window.open('/test-voice-agents.html', '_blank');
+        }
+
+        // Animate stats on scroll
+        const observerOptions = {
+            threshold: 0.5,
+            rootMargin: '0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.animation = 'fadeInUp 1s ease';
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.stat, .agent-preview-card, .feature').forEach(el => {
+            observer.observe(el);
+        });
+
+        // Add floating navigation on scroll
+        let lastScroll = 0;
+        window.addEventListener('scroll', () => {
+            const currentScroll = window.pageYOffset;
+
+            if (currentScroll > 100) {
+                document.body.classList.add('scrolled');
+            } else {
+                document.body.classList.remove('scrolled');
+            }
+
+            lastScroll = currentScroll;
+        });
+    </script>
+</body>
+</html>
