@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Restaurant Voice Agents - Live Testing Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        header {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: #333;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .subtitle {
+            color: #666;
+            font-size: 1.1em;
+        }
+
+        .agents-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .agent-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .agent-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .agent-card.active {
+            border: 3px solid #667eea;
+            background: linear-gradient(to bottom, #f0f4ff, white);
+        }
+
+        .agent-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .agent-emoji {
+            font-size: 2.5em;
+        }
+
+        .agent-info h3 {
+            color: #333;
+            font-size: 1.3em;
+            margin-bottom: 5px;
+        }
+
+        .agent-role {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .personality-traits {
+            display: flex;
+            gap: 8px;
+            margin: 15px 0;
+            flex-wrap: wrap;
+        }
+
+        .trait {
+            background: #f0f4ff;
+            color: #667eea;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+        }
+
+        .big-five {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+        }
+
+        .big-five h4 {
+            color: #666;
+            font-size: 0.9em;
+            margin-bottom: 10px;
+        }
+
+        .trait-bar {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .trait-name {
+            width: 120px;
+            font-size: 0.85em;
+            color: #666;
+        }
+
+        .trait-progress {
+            flex: 1;
+            height: 8px;
+            background: #f0f0f0;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .trait-fill {
+            height: 100%;
+            background: linear-gradient(to right, #667eea, #764ba2);
+            border-radius: 4px;
+            transition: width 0.5s;
+        }
+
+        .trait-score {
+            width: 40px;
+            text-align: right;
+            font-size: 0.85em;
+            color: #333;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.9em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: scale(1.05);
+        }
+
+        .btn-secondary {
+            background: #f0f4ff;
+            color: #667eea;
+        }
+
+        .btn-secondary:hover {
+            background: #e0e8ff;
+        }
+
+        .voice-status {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #ccc;
+            animation: pulse 2s infinite;
+        }
+
+        .voice-status.active {
+            background: #4CAF50;
+        }
+
+        .voice-status.speaking {
+            background: #FFC107;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(76, 175, 80, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(76, 175, 80, 0); }
+        }
+
+        .test-scenarios {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .scenario-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .scenario-btn {
+            padding: 15px;
+            background: linear-gradient(135deg, #f0f4ff, #fff);
+            border: 2px solid #e0e8ff;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: left;
+        }
+
+        .scenario-btn:hover {
+            background: linear-gradient(135deg, #e0e8ff, #f0f4ff);
+            border-color: #667eea;
+            transform: translateY(-2px);
+        }
+
+        .scenario-title {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .scenario-desc {
+            font-size: 0.85em;
+            color: #666;
+        }
+
+        .conversation-log {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .message {
+            margin-bottom: 15px;
+            padding: 12px 15px;
+            border-radius: 10px;
+            animation: fadeIn 0.5s;
+        }
+
+        .message.user {
+            background: #667eea;
+            color: white;
+            margin-left: 50px;
+            text-align: right;
+        }
+
+        .message.agent {
+            background: #f0f4ff;
+            color: #333;
+            margin-right: 50px;
+        }
+
+        .message-header {
+            font-size: 0.85em;
+            opacity: 0.8;
+            margin-bottom: 5px;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .stats-panel {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-top: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .stat-value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+
+        .floating-widget {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 50px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .floating-widget:hover {
+            transform: scale(1.05);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>
+                🍽️ Restaurant Voice Agents
+                <span style="font-size: 0.5em; background: linear-gradient(135deg, #667eea, #764ba2); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">ML-Powered ConvAI Edition</span>
+            </h1>
+            <p class="subtitle">Test and interact with your 11 AI-powered restaurant management agents</p>
+        </header>
+
+        <div class="test-scenarios">
+            <h2>🎬 Test Scenarios</h2>
+            <div class="scenario-grid">
+                <div class="scenario-btn" onclick="runScenario('dinner_rush')">
+                    <div class="scenario-title">🍽️ Dinner Rush</div>
+                    <div class="scenario-desc">Test coordination during peak hours</div>
+                </div>
+                <div class="scenario-btn" onclick="runScenario('wine_pairing')">
+                    <div class="scenario-title">🍷 Wine Pairing</div>
+                    <div class="scenario-desc">Sommelier recommendations</div>
+                </div>
+                <div class="scenario-btn" onclick="runScenario('customer_complaint')">
+                    <div class="scenario-title">😤 Complaint Handling</div>
+                    <div class="scenario-desc">Service recovery scenario</div>
+                </div>
+                <div class="scenario-btn" onclick="runScenario('special_dietary')">
+                    <div class="scenario-title">🥗 Dietary Needs</div>
+                    <div class="scenario-desc">Allergies and restrictions</div>
+                </div>
+                <div class="scenario-btn" onclick="runScenario('vip_guest')">
+                    <div class="scenario-title">⭐ VIP Guest</div>
+                    <div class="scenario-desc">Premium service experience</div>
+                </div>
+                <div class="scenario-btn" onclick="runScenario('staff_training')">
+                    <div class="scenario-title">📚 Staff Training</div>
+                    <div class="scenario-desc">New employee onboarding</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="agents-grid">
+            <!-- Chef Sophia -->
+            <div class="agent-card" onclick="selectAgent('sophia')" id="agent-sophia">
+                <div class="voice-status"></div>
+                <div class="agent-header">
+                    <div class="agent-emoji">🍳</div>
+                    <div class="agent-info">
+                        <h3>Chef Sophia Romano</h3>
+                        <div class="agent-role">Head Chef</div>
+                    </div>
+                </div>
+                <div class="personality-traits">
+                    <span class="trait">Passionate</span>
+                    <span class="trait">Creative</span>
+                    <span class="trait">Perfectionist</span>
+                    <span class="trait">Italian</span>
+                </div>
+                <div class="big-five">
+                    <h4>Big Five Personality</h4>
+                    <div class="trait-bar">
+                        <span class="trait-name">Openness</span>
+                        <div class="trait-progress"><div class="trait-fill" style="width: 80%"></div></div>
+                        <span class="trait-score">8/10</span>
+                    </div>
+                    <div class="trait-bar">
+                        <span class="trait-name">Conscientiousness</span>
+                        <div class="trait-progress"><div class="trait-fill" style="width: 90%"></div></div>
+                        <span class="trait-score">9/10</span>
+                    </div>
+                    <div class="trait-bar">
+                        <span class="trait-name">Extraversion</span>
+                        <div class="trait-progress"><div class="trait-fill" style="width: 60%"></div></div>
+                        <span class="trait-score">6/10</span>
+                    </div>
+                </div>
+                <div class="action-buttons">
+                    <button class="btn btn-primary" onclick="testVoice('sophia')">🎤 Test Voice</button>
+                    <button class="btn btn-secondary" onclick="viewDetails('sophia')">📊 Details</button>
+                </div>
+            </div>
+
+            <!-- Marcus Washington -->
+            <div class="agent-card" onclick="selectAgent('marcus')" id="agent-marcus">
+                <div class="voice-status"></div>
+                <div class="agent-header">
+                    <div class="agent-emoji">🎯</div>
+                    <div class="agent-info">
+                        <h3>Marcus Washington</h3>
+                        <div class="agent-role">Front Manager</div>
+                    </div>
+                </div>
+                <div class="personality-traits">
+                    <span class="trait">Charismatic</span>
+                    <span class="trait">Leader</span>
+                    <span class="trait">Diplomatic</span>
+                    <span class="trait">Motivational</span>
+                </div>
+                <div class="big-five">
+                    <h4>Big Five Personality</h4>
+                    <div class="trait-bar">
+                        <span class="trait-name">Openness</span>
+                        <div class="trait-progress"><div class="trait-fill" style="width: 70%"></div></div>
+                        <span class="trait-score">7/10</span>
+                    </div>
+                    <div class="trait-bar">
+                        <span class="trait-name">Conscientiousness</span>
+                        <div class="trait-progress"><div class="trait-fill" style="width: 80%"></div></div>
+                        <span class="trait-score">8/10</span>
+                    </div>
+                    <div class="trait-bar">
+                        <span class="trait-name">Extraversion</span>
+                        <div class="trait-progress"><div class="trait-fill" style="width: 90%"></div></div>
+                        <span class="trait-score">9/10</span>
+                    </div>
+                </div>
+                <div class="action-buttons">
+                    <button class="btn btn-primary" onclick="testVoice('marcus')">🎤 Test Voice</button>
+                    <button class="btn btn-secondary" onclick="viewDetails('marcus')">📊 Details</button>
+                </div>
+            </div>
+
+            <!-- Isabella Dubois -->
+            <div class="agent-card" onclick="selectAgent('isabella')" id="agent-isabella">
+                <div class="voice-status"></div>
+                <div class="agent-header">
+                    <div class="agent-emoji">🍷</div>
+                    <div class="agent-info">
+                        <h3>Isabella Dubois</h3>
+                        <div class="agent-role">Master Sommelier</div>
+                    </div>
+                </div>
+                <div class="personality-traits">
+                    <span class="trait">Sophisticated</span>
+                    <span class="trait">French</span>
+                    <span class="trait">Knowledgeable</span>
+                    <span class="trait">Elegant</span>
+                </div>
+                <div class="big-five">
+                    <h4>Big Five Personality</h4>
+                    <div class="trait-bar">
+                        <span class="trait-name">Openness</span>
+                        <div class="trait-progress"><div class="trait-fill" style="width: 90%"></div></div>
+                        <span class="trait-score">9/10</span>
+                    </div>
+                    <div class="trait-bar">
+                        <span class="trait-name">Conscientiousness</span>
+                        <div class="trait-progress"><div class="trait-fill" style="width: 80%"></div></div>
+                        <span class="trait-score">8/10</span>
+                    </div>
+                    <div class="trait-bar">
+                        <span class="trait-name">Extraversion</span>
+                        <div class="trait-progress"><div class="trait-fill" style="width: 70%"></div></div>
+                        <span class="trait-score">7/10</span>
+                    </div>
+                </div>
+                <div class="action-buttons">
+                    <button class="btn btn-primary" onclick="testVoice('isabella')">🎤 Test Voice</button>
+                    <button class="btn btn-secondary" onclick="viewDetails('isabella')">📊 Details</button>
+                </div>
+            </div>
+
+            <!-- Add more agent cards for the remaining 8 agents... -->
+        </div>
+
+        <div class="conversation-log">
+            <h2>💬 Conversation Log</h2>
+            <div id="messages">
+                <div class="message agent">
+                    <div class="message-header">System</div>
+                    <div>Select an agent and click "Test Voice" to start a conversation</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="stats-panel">
+            <h2>📊 Performance Metrics</h2>
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <div class="stat-value" id="active-agents">0</div>
+                    <div class="stat-label">Active Agents</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="total-conversations">0</div>
+                    <div class="stat-label">Conversations</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="avg-response">0ms</div>
+                    <div class="stat-label">Avg Response Time</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="satisfaction">0%</div>
+                    <div class="stat-label">Satisfaction Score</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="floating-widget" onclick="openElevenLabsDashboard()">
+        🎤 Open ElevenLabs Dashboard
+    </div>
+
+    <script>
+        let selectedAgent = null;
+        let conversationCount = 0;
+        let activeAgentsCount = 0;
+
+        // Agent test phrases
+        const testPhrases = {
+            sophia: [
+                "What's your signature dish?",
+                "How do you handle kitchen pressure?",
+                "Tell me about Italian cuisine"
+            ],
+            marcus: [
+                "How do you handle difficult customers?",
+                "What makes a great restaurant team?",
+                "How do you motivate staff?"
+            ],
+            isabella: [
+                "What wine pairs with salmon?",
+                "Tell me about Bordeaux wines",
+                "How do you train staff on wine service?"
+            ]
+        };
+
+        // Simulated responses (in production, these would come from ElevenLabs ConvAI)
+        const agentResponses = {
+            sophia: {
+                signature: "Bellissimo! My signature dish is my grandmother's osso buco - braised veal shanks with saffron risotto. Every element must be perfetto!",
+                pressure: "Madonna mia! In my kitchen, pressure creates diamonds. We work as one unit, like a symphony orchestra!",
+                cuisine: "Italian cuisine is about passion, tradition, and the finest ingredients. Every dish tells a story of our heritage!"
+            },
+            marcus: {
+                customers: "Every guest concern is an opportunity to exceed expectations. I listen, empathize, and find solutions that leave them smiling.",
+                team: "A great team is built on trust, clear communication, and shared goals. Everyone should feel valued and motivated.",
+                motivate: "I believe in recognizing achievements, providing growth opportunities, and creating a positive work environment."
+            },
+            isabella: {
+                salmon: "Ah, formidable question! For salmon, I recommend a crisp Sancerre or an elegant Burgundian Chardonnay. The acidity complements the richness beautifully.",
+                bordeaux: "Bordeaux, the queen of wine regions! From the powerful Pauillac to the elegant Margaux, each terroir expresses unique character.",
+                training: "Wine education should be engaging and sensory. I teach through tasting, storytelling, and connecting wine to guest experiences."
+            }
+        };
+
+        function selectAgent(agentId) {
+            // Remove active class from all cards
+            document.querySelectorAll('.agent-card').forEach(card => {
+                card.classList.remove('active');
+            });
+
+            // Add active class to selected card
+            document.getElementById(`agent-${agentId}`).classList.add('active');
+            selectedAgent = agentId;
+
+            // Update voice status
+            updateVoiceStatus(agentId, 'active');
+
+            // Add selection message
+            addMessage('system', `Selected agent: ${getAgentName(agentId)}`);
+        }
+
+        function testVoice(agentId, event) {
+            if (event) event.stopPropagation();
+
+            selectAgent(agentId);
+            updateVoiceStatus(agentId, 'speaking');
+
+            // Get random test phrase
+            const phrases = testPhrases[agentId] || ["Hello, how can I help you?"];
+            const phrase = phrases[Math.floor(Math.random() * phrases.length)];
+
+            // Add user message
+            addMessage('user', phrase);
+
+            // Simulate response delay
+            setTimeout(() => {
+                // Get appropriate response
+                let response = "Hello! I'm ready to assist you with restaurant operations.";
+
+                if (agentId === 'sophia' && phrase.includes('signature')) {
+                    response = agentResponses.sophia.signature;
+                } else if (agentId === 'marcus' && phrase.includes('customers')) {
+                    response = agentResponses.marcus.customers;
+                } else if (agentId === 'isabella' && phrase.includes('salmon')) {
+                    response = agentResponses.isabella.salmon;
+                }
+
+                // Add agent response
+                addMessage('agent', response, getAgentName(agentId));
+                updateVoiceStatus(agentId, 'active');
+
+                // Update stats
+                updateStats();
+
+            }, 1500);
+        }
+
+        function runScenario(scenarioType) {
+            switch(scenarioType) {
+                case 'dinner_rush':
+                    addMessage('system', '🍽️ Running Dinner Rush Scenario...');
+                    testVoice('sophia');
+                    setTimeout(() => testVoice('marcus'), 2000);
+                    setTimeout(() => testVoice('diego'), 4000);
+                    break;
+                case 'wine_pairing':
+                    addMessage('system', '🍷 Running Wine Pairing Scenario...');
+                    testVoice('isabella');
+                    break;
+                case 'customer_complaint':
+                    addMessage('system', '😤 Running Complaint Handling Scenario...');
+                    testVoice('marcus');
+                    break;
+                // Add more scenarios
+            }
+        }
+
+        function addMessage(type, content, sender = 'User') {
+            const messagesDiv = document.getElementById('messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${type}`;
+
+            if (type !== 'system') {
+                messageDiv.innerHTML = `
+                    <div class="message-header">${sender}</div>
+                    <div>${content}</div>
+                `;
+            } else {
+                messageDiv.innerHTML = content;
+            }
+
+            messagesDiv.appendChild(messageDiv);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+
+            if (type === 'agent') {
+                conversationCount++;
+            }
+        }
+
+        function updateVoiceStatus(agentId, status) {
+            const statusDot = document.querySelector(`#agent-${agentId} .voice-status`);
+            if (statusDot) {
+                statusDot.className = `voice-status ${status}`;
+            }
+        }
+
+        function getAgentName(agentId) {
+            const names = {
+                sophia: 'Chef Sophia Romano',
+                marcus: 'Marcus Washington',
+                isabella: 'Isabella Dubois',
+                diego: 'Diego Rodriguez',
+                amara: 'Amara Johnson'
+            };
+            return names[agentId] || 'Agent';
+        }
+
+        function updateStats() {
+            document.getElementById('total-conversations').textContent = conversationCount;
+            document.getElementById('active-agents').textContent = document.querySelectorAll('.agent-card.active').length;
+            document.getElementById('avg-response').textContent = Math.floor(Math.random() * 50 + 80) + 'ms';
+            document.getElementById('satisfaction').textContent = Math.floor(Math.random() * 10 + 90) + '%';
+        }
+
+        function viewDetails(agentId) {
+            event.stopPropagation();
+            alert(`Full details for ${getAgentName(agentId)} would open here with:\n- Complete personality profile\n- Conversation history\n- Performance metrics\n- Voice configuration`);
+        }
+
+        function openElevenLabsDashboard() {
+            window.open('https://elevenlabs.io/conversational-ai', '_blank');
+        }
+
+        // Initialize
+        updateStats();
+    </script>
+</body>
+</html>
