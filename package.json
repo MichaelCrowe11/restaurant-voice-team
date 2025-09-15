@@ -1,15 +1,20 @@
 {
   "name": "restaurant-voice-agents",
-  "version": "1.0.0",
-  "description": "ElevenLabs voice-first restaurant management team with unique personalities and abilities",
-  "main": "src/cli.js",
+  "version": "2.0.0",
+  "description": "ElevenLabs ConvAI-powered restaurant management team with ML-enriched personalities from Hugging Face and OpenML datasets",
+  "main": "src/cli/enhanced-cli.js",
   "type": "module",
   "bin": {
-    "restaurant-agents": "./src/cli.js"
+    "restaurant-agents": "./src/cli/enhanced-cli.js"
   },
   "scripts": {
-    "start": "node src/cli.js",
-    "dev": "node --watch src/cli.js",
+    "start": "node src/cli/enhanced-cli.js",
+    "dev": "node --watch src/cli/enhanced-cli.js",
+    "create": "node src/cli/enhanced-cli.js create",
+    "deploy": "node src/cli/enhanced-cli.js deploy",
+    "enrich": "node src/cli/enhanced-cli.js enrich --full",
+    "setup": "node src/cli/enhanced-cli.js setup",
+    "status": "node src/cli/enhanced-cli.js status",
     "test": "node --test",
     "lint": "eslint src/",
     "format": "prettier --write src/"
@@ -18,11 +23,17 @@
     "restaurant",
     "voice-agents",
     "elevenlabs",
+    "convai",
     "cli",
     "management",
-    "hospitality"
+    "hospitality",
+    "machine-learning",
+    "personality",
+    "huggingface",
+    "openml",
+    "big-five"
   ],
-  "author": "Your Restaurant Team",
+  "author": "Restaurant Voice Agents Team",
   "license": "MIT",
   "dependencies": {
     "commander": "^11.1.0",
@@ -32,10 +43,22 @@
     "axios": "^1.6.0",
     "dotenv": "^16.3.1",
     "node-schedule": "^2.1.1",
-    "ws": "^8.14.2"
+    "ws": "^8.14.2",
+    "@elevenlabs/convai-cli": "latest"
   },
   "devDependencies": {
     "eslint": "^8.55.0",
     "prettier": "^3.1.0"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/MichaelCrowe11/restaurant-voice-team.git"
+  },
+  "homepage": "https://github.com/MichaelCrowe11/restaurant-voice-team#readme",
+  "bugs": {
+    "url": "https://github.com/MichaelCrowe11/restaurant-voice-team/issues"
   }
 }
