@@ -2,13 +2,14 @@
   "name": "restaurant-voice-agents",
   "version": "2.0.0",
   "description": "ElevenLabs ConvAI-powered restaurant management team with ML-enriched personalities from Hugging Face and OpenML datasets",
-  "main": "src/cli/enhanced-cli.js",
+  "main": "server.js",
   "type": "module",
   "bin": {
     "restaurant-agents": "./src/cli/enhanced-cli.js"
   },
   "scripts": {
-    "start": "node src/cli/enhanced-cli.js",
+    "start": "node server.js",
+    "cli": "node src/cli/enhanced-cli.js",
     "dev": "node --watch src/cli/enhanced-cli.js",
     "create": "node src/cli/enhanced-cli.js create",
     "deploy": "node src/cli/enhanced-cli.js deploy",
@@ -37,13 +38,15 @@
   "license": "MIT",
   "dependencies": {
     "@elevenlabs/convai-cli": "latest",
+    "@tensorflow/tfjs-node": "^4.15.0",
     "axios": "^1.6.0",
     "chalk": "^5.3.0",
     "commander": "^11.1.0",
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
-    "express": "^5.1.0",
+    "express": "^4.18.2",
     "inquirer": "^9.2.12",
+    "natural": "^6.10.0",
     "node-schedule": "^2.1.1",
     "ora": "^7.0.1",
     "ws": "^8.14.2"

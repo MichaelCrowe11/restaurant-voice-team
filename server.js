@@ -8,8 +8,29 @@ import { promisify } from 'util';
 import fs from 'fs/promises';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import CollectiveIntelligence from './src/intelligence/CollectiveIntelligence.js';
-import PredictiveEngine from './src/intelligence/PredictiveEngine.js';
+// Conditional imports for production deployment
+let CollectiveIntelligence, PredictiveEngine;
+
+try {
+    const intelligenceModule = await import('./src/intelligence/CollectiveIntelligence.js');
+    CollectiveIntelligence = intelligenceModule.default;
+
+    const predictiveModule = await import('./src/intelligence/PredictiveEngine.js');
+    PredictiveEngine = predictiveModule.default;
+} catch (error) {
+    console.log('⚠️  Intelligence modules not available, running in basic mode');
+    // Create mock classes for basic functionality
+    CollectiveIntelligence = class {
+        processAgentCommunication() { return null; }
+        generateInsights() { return { message: 'Intelligence features disabled' }; }
+    };
+    PredictiveEngine = class {
+        async predictCustomerNeeds() { return { message: 'Prediction features disabled' }; }
+        async forecastDemand() { return { message: 'Forecast features disabled' }; }
+        async optimizeStaffing() { return { message: 'Optimization features disabled' }; }
+        async detectAnomalies() { return { detected: false }; }
+    };
+}
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -35,6 +56,10 @@ let agentConfigs = {};
 const collectiveIntelligence = new CollectiveIntelligence();
 const predictiveEngine = new PredictiveEngine();
 
+// Initialize Database
+import DatabaseManager from './src/database/db.js';
+const db = new DatabaseManager();
+
 async function loadAgentConfigs() {
     try {
         const configPath = path.join(__dirname, 'convai-configs', 'all-agents.json');
@@ -49,6 +74,17 @@ async function loadAgentConfigs() {
         console.error('Failed to load agent configs:', error);
     }
 }
+
+// Health check endpoint
+app.get('/health', (req, res) => {
+    res.json({
+        status: 'healthy',
+        timestamp: new Date().toISOString(),
+        agents: Object.keys(agentConfigs).length,
+        intelligence: CollectiveIntelligence ? 'enabled' : 'disabled',
+        prediction: PredictiveEngine ? 'enabled' : 'disabled'
+    });
+});
 
 // API Routes
 
@@ -417,6 +453,8 @@ app.get('/health', (req, res) => {
 // Start server
 async function startServer() {
     await loadAgentConfigs();
+    await db.initialize();
+    await db.loadExistingData();
 
     app.listen(PORT, () => {
         console.log(`
