@@ -1,0 +1,922 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎤 Live Voice Chat - Restaurant Agents</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .agents-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .agent-card {
+            background: white;
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .agent-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+
+        .agent-card.active {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            transform: scale(1.02);
+        }
+
+        .agent-card.speaking {
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(79, 172, 254, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(79, 172, 254, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(79, 172, 254, 0); }
+        }
+
+        .agent-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            margin: 0 auto 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5em;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            position: relative;
+        }
+
+        .agent-card.active .agent-avatar {
+            background: rgba(255,255,255,0.2);
+        }
+
+        .agent-name {
+            font-size: 1.4em;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 8px;
+        }
+
+        .agent-role {
+            text-align: center;
+            opacity: 0.8;
+            margin-bottom: 15px;
+            font-style: italic;
+        }
+
+        .agent-status {
+            text-align: center;
+            font-size: 0.9em;
+            padding: 8px 15px;
+            border-radius: 20px;
+            background: #f0f0f0;
+            color: #666;
+            margin-top: 10px;
+        }
+
+        .agent-card.active .agent-status {
+            background: rgba(255,255,255,0.2);
+            color: white;
+        }
+
+        .conversation-panel {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+            margin-bottom: 20px;
+            min-height: 400px;
+        }
+
+        .conversation-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .current-agent {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .current-agent-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5em;
+        }
+
+        .conversation-messages {
+            max-height: 300px;
+            overflow-y: auto;
+            margin-bottom: 20px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 15px;
+        }
+
+        .message {
+            margin-bottom: 15px;
+            padding: 12px 18px;
+            border-radius: 18px;
+            max-width: 80%;
+            position: relative;
+        }
+
+        .message.user {
+            background: #667eea;
+            color: white;
+            margin-left: auto;
+            text-align: right;
+        }
+
+        .message.agent {
+            background: white;
+            border: 2px solid #e0e0e0;
+            margin-right: auto;
+        }
+
+        .message-time {
+            font-size: 0.8em;
+            opacity: 0.7;
+            margin-top: 5px;
+        }
+
+        .voice-controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .voice-button {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2em;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .voice-button.listen {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+        }
+
+        .voice-button.listen:hover {
+            transform: scale(1.1);
+        }
+
+        .voice-button.listening {
+            background: #ff4757;
+            animation: pulse-record 1s infinite;
+        }
+
+        @keyframes pulse-record {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        .voice-button.speak {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .voice-status {
+            text-align: center;
+            margin-top: 15px;
+            font-weight: 500;
+            color: #666;
+        }
+
+        .personality-indicator {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 15px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .trait {
+            text-align: center;
+            flex: 1;
+        }
+
+        .trait-name {
+            font-size: 0.8em;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .trait-value {
+            font-weight: bold;
+            color: #667eea;
+            font-size: 0.9em;
+        }
+
+        .audio-visualizer {
+            height: 60px;
+            background: #f0f0f0;
+            border-radius: 10px;
+            margin: 15px 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .visualizer-bar {
+            width: 4px;
+            background: #667eea;
+            margin: 0 1px;
+            border-radius: 2px;
+            transition: height 0.1s ease;
+        }
+
+        .emotion-indicator {
+            text-align: center;
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 10px;
+            background: #f8f9fa;
+        }
+
+        .emotion-label {
+            font-size: 0.9em;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .emotion-value {
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+
+        .settings-panel {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+
+        .setting-group {
+            margin-bottom: 15px;
+        }
+
+        .setting-label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: #666;
+        }
+
+        .setting-input {
+            width: 100%;
+            padding: 8px 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .error-message {
+            background: #ff4757;
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .success-message {
+            background: #2ed573;
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        @media (max-width: 768px) {
+            .agents-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .voice-controls {
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎤 Live Voice Chat with Restaurant Agents</h1>
+
+        <div class="agents-grid" id="agentsGrid">
+            <!-- Agents will be loaded here -->
+        </div>
+
+        <div class="conversation-panel" id="conversationPanel" style="display: none;">
+            <div class="conversation-header">
+                <div class="current-agent">
+                    <div class="current-agent-avatar" id="currentAgentAvatar">👤</div>
+                    <div>
+                        <div class="agent-name" id="currentAgentName">Select an Agent</div>
+                        <div class="agent-role" id="currentAgentRole">Choose an agent to start talking</div>
+                    </div>
+                </div>
+                <button onclick="endConversation()" style="background: #ff4757; color: white; border: none; padding: 10px 20px; border-radius: 20px; cursor: pointer;">End Chat</button>
+            </div>
+
+            <div class="conversation-messages" id="conversationMessages"></div>
+
+            <div class="audio-visualizer" id="audioVisualizer">
+                <div class="visualizer-bar"></div>
+                <div class="visualizer-bar"></div>
+                <div class="visualizer-bar"></div>
+                <div class="visualizer-bar"></div>
+                <div class="visualizer-bar"></div>
+                <div class="visualizer-bar"></div>
+                <div class="visualizer-bar"></div>
+                <div class="visualizer-bar"></div>
+            </div>
+
+            <div class="voice-controls">
+                <button class="voice-button listen" id="listenBtn" onclick="toggleListening()">
+                    🎤
+                </button>
+                <button class="voice-button speak" id="speakBtn" onclick="testSpeak()" disabled>
+                    🔊
+                </button>
+            </div>
+
+            <div class="voice-status" id="voiceStatus">Click the microphone to start talking</div>
+
+            <div class="personality-indicator" id="personalityIndicator">
+                <div class="trait">
+                    <div class="trait-name">Extraversion</div>
+                    <div class="trait-value" id="extraversion">0.7</div>
+                </div>
+                <div class="trait">
+                    <div class="trait-name">Agreeableness</div>
+                    <div class="trait-value" id="agreeableness">0.8</div>
+                </div>
+                <div class="trait">
+                    <div class="trait-name">Conscientiousness</div>
+                    <div class="trait-value" id="conscientiousness">0.9</div>
+                </div>
+            </div>
+
+            <div class="emotion-indicator">
+                <div class="emotion-label">Current Emotional State</div>
+                <div class="emotion-value" id="emotionValue">😊 Welcoming</div>
+            </div>
+        </div>
+
+        <div class="settings-panel">
+            <h3 style="margin-bottom: 15px;">🔧 Voice Settings</h3>
+            <div class="setting-group">
+                <label class="setting-label">Voice Recognition Language</label>
+                <select class="setting-input" id="languageSelect">
+                    <option value="en-US">English (US)</option>
+                    <option value="en-GB">English (UK)</option>
+                    <option value="es-ES">Spanish</option>
+                    <option value="fr-FR">French</option>
+                    <option value="it-IT">Italian</option>
+                </select>
+            </div>
+            <div class="setting-group">
+                <label class="setting-label">Response Speed</label>
+                <input type="range" class="setting-input" id="speedSlider" min="0.5" max="2" step="0.1" value="1">
+            </div>
+            <div class="setting-group">
+                <label class="setting-label">Voice Volume</label>
+                <input type="range" class="setting-input" id="volumeSlider" min="0" max="1" step="0.1" value="0.8">
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global state
+        let currentAgent = null;
+        let isListening = false;
+        let recognition = null;
+        let audioContext = null;
+        let conversationHistory = [];
+        let agents = [];
+
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', async () => {
+            await loadAgents();
+            initializeSpeechRecognition();
+            initializeAudioContext();
+        });
+
+        // Load agents from API
+        async function loadAgents() {
+            try {
+                const response = await fetch('/api/agents');
+                agents = await response.json();
+                renderAgents();
+            } catch (error) {
+                console.error('Failed to load agents:', error);
+                showError('Failed to load agents. Please check your connection.');
+            }
+        }
+
+        // Render agent cards
+        function renderAgents() {
+            const grid = document.getElementById('agentsGrid');
+            grid.innerHTML = '';
+
+            const agentProfiles = {
+                sophia: { emoji: '👩‍🍳', traits: { extraversion: 0.65, agreeableness: 0.45, conscientiousness: 0.95 } },
+                marcus: { emoji: '👨‍💼', traits: { extraversion: 0.85, agreeableness: 0.90, conscientiousness: 0.85 } },
+                isabella: { emoji: '🍷', traits: { extraversion: 0.60, agreeableness: 0.75, conscientiousness: 0.80 } },
+                raj: { emoji: '👨‍🍳', traits: { extraversion: 0.70, agreeableness: 0.80, conscientiousness: 0.75 } },
+                elena: { emoji: '🧁', traits: { extraversion: 0.55, agreeableness: 0.70, conscientiousness: 0.90 } }
+            };
+
+            agents.forEach(agent => {
+                const profile = agentProfiles[agent.id] || { emoji: '👤', traits: { extraversion: 0.5, agreeableness: 0.5, conscientiousness: 0.5 } };
+
+                const card = document.createElement('div');
+                card.className = 'agent-card';
+                card.onclick = () => selectAgent(agent, profile);
+
+                card.innerHTML = `
+                    <div class="agent-avatar">${profile.emoji}</div>
+                    <div class="agent-name">${agent.name}</div>
+                    <div class="agent-role">${agent.role}</div>
+                    <div class="agent-status">Ready to chat</div>
+                `;
+
+                grid.appendChild(card);
+            });
+        }
+
+        // Select an agent for conversation
+        function selectAgent(agent, profile) {
+            currentAgent = { ...agent, profile };
+
+            // Update UI
+            document.querySelectorAll('.agent-card').forEach(card => card.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+
+            // Show conversation panel
+            document.getElementById('conversationPanel').style.display = 'block';
+            document.getElementById('currentAgentAvatar').textContent = profile.emoji;
+            document.getElementById('currentAgentName').textContent = agent.name;
+            document.getElementById('currentAgentRole').textContent = agent.role;
+
+            // Update personality indicators
+            document.getElementById('extraversion').textContent = profile.traits.extraversion.toFixed(1);
+            document.getElementById('agreeableness').textContent = profile.traits.agreeableness.toFixed(1);
+            document.getElementById('conscientiousness').textContent = profile.traits.conscientiousness.toFixed(1);
+
+            // Clear conversation
+            conversationHistory = [];
+            document.getElementById('conversationMessages').innerHTML = '';
+
+            // Initial greeting
+            addMessage('agent', `Hello! I'm ${agent.name}. ${getPersonalizedGreeting(agent)}`);
+
+            // Enable speak button
+            document.getElementById('speakBtn').disabled = false;
+
+            // Update status
+            updateVoiceStatus('Ready to listen');
+            updateEmotionalState('welcoming');
+        }
+
+        // Get personalized greeting based on agent
+        function getPersonalizedGreeting(agent) {
+            const greetings = {
+                sophia: "Welcome to my kitchen! What culinary adventure can I create for you today?",
+                marcus: "Wonderful to have you here! How can I make your dining experience exceptional?",
+                isabella: "Bonjour! I'm delighted to help you discover the perfect wine pairing.",
+                raj: "Great to meet you! I'm excited to share some innovative flavors with you.",
+                elena: "Hello there! I've been dreaming up some sweet creations just for you."
+            };
+            return greetings[agent.id] || "How can I assist you today?";
+        }
+
+        // Initialize speech recognition
+        function initializeSpeechRecognition() {
+            if ('webkitSpeechRecognition' in window) {
+                recognition = new webkitSpeechRecognition();
+            } else if ('SpeechRecognition' in window) {
+                recognition = new SpeechRecognition();
+            } else {
+                showError('Speech recognition not supported in this browser');
+                return;
+            }
+
+            recognition.continuous = false;
+            recognition.interimResults = true;
+            recognition.lang = document.getElementById('languageSelect').value;
+
+            recognition.onstart = () => {
+                updateVoiceStatus('Listening...');
+                startVisualizer();
+            };
+
+            recognition.onresult = (event) => {
+                let transcript = '';
+                for (let i = event.resultIndex; i < event.results.length; i++) {
+                    transcript += event.results[i][0].transcript;
+                }
+
+                if (event.results[event.results.length - 1].isFinal) {
+                    handleUserSpeech(transcript);
+                }
+            };
+
+            recognition.onerror = (event) => {
+                console.error('Speech recognition error:', event.error);
+                updateVoiceStatus('Error: ' + event.error);
+                stopListening();
+            };
+
+            recognition.onend = () => {
+                stopListening();
+            };
+        }
+
+        // Initialize audio context for visualizer
+        function initializeAudioContext() {
+            try {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            } catch (error) {
+                console.error('Audio context not supported:', error);
+            }
+        }
+
+        // Toggle listening state
+        function toggleListening() {
+            if (!currentAgent) {
+                showError('Please select an agent first');
+                return;
+            }
+
+            if (isListening) {
+                stopListening();
+            } else {
+                startListening();
+            }
+        }
+
+        // Start listening
+        function startListening() {
+            if (!recognition) return;
+
+            try {
+                recognition.lang = document.getElementById('languageSelect').value;
+                recognition.start();
+                isListening = true;
+
+                document.getElementById('listenBtn').classList.add('listening');
+                document.getElementById('listenBtn').textContent = '🛑';
+                updateVoiceStatus('Listening... Speak now');
+            } catch (error) {
+                console.error('Failed to start recognition:', error);
+                showError('Failed to start voice recognition');
+            }
+        }
+
+        // Stop listening
+        function stopListening() {
+            if (recognition && isListening) {
+                recognition.stop();
+            }
+
+            isListening = false;
+            document.getElementById('listenBtn').classList.remove('listening');
+            document.getElementById('listenBtn').textContent = '🎤';
+            updateVoiceStatus('Click microphone to speak');
+            stopVisualizer();
+        }
+
+        // Handle user speech input
+        async function handleUserSpeech(transcript) {
+            if (!transcript.trim()) return;
+
+            addMessage('user', transcript);
+            updateVoiceStatus('Processing...');
+            updateEmotionalState('thinking');
+
+            try {
+                // Send to agent for processing
+                const response = await fetch(`/api/agents/${currentAgent.id}/test`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        message: transcript,
+                        context: {
+                            conversationHistory: conversationHistory.slice(-5),
+                            emotionalState: getCurrentEmotionalState(),
+                            personalityTraits: currentAgent.profile.traits
+                        }
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.response) {
+                    addMessage('agent', data.response);
+                    updateEmotionalState(data.emotion || 'positive');
+
+                    // Synthesize speech
+                    await speakText(data.response);
+                } else {
+                    throw new Error('No response from agent');
+                }
+
+            } catch (error) {
+                console.error('Error processing speech:', error);
+                addMessage('agent', "I'm sorry, I didn't catch that. Could you please repeat?");
+                updateEmotionalState('confused');
+            }
+
+            updateVoiceStatus('Ready to listen');
+        }
+
+        // Add message to conversation
+        function addMessage(type, text) {
+            const messages = document.getElementById('conversationMessages');
+            const message = document.createElement('div');
+            message.className = `message ${type}`;
+
+            const time = new Date().toLocaleTimeString();
+            message.innerHTML = `
+                ${text}
+                <div class="message-time">${time}</div>
+            `;
+
+            messages.appendChild(message);
+            messages.scrollTop = messages.scrollHeight;
+
+            // Add to conversation history
+            conversationHistory.push({ type, text, timestamp: Date.now() });
+        }
+
+        // Speak text using Web Speech API (fallback) or ElevenLabs
+        async function speakText(text) {
+            try {
+                // First try ElevenLabs API if available
+                if (currentAgent.voice_id) {
+                    await speakWithElevenLabs(text);
+                } else {
+                    // Fallback to Web Speech API
+                    speakWithWebAPI(text);
+                }
+            } catch (error) {
+                console.error('Speech synthesis error:', error);
+                // Fallback to Web Speech API
+                speakWithWebAPI(text);
+            }
+        }
+
+        // Speak with ElevenLabs API
+        async function speakWithElevenLabs(text) {
+            const response = await fetch(`/api/agents/${currentAgent.id}/test`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message: text, synthesize: true })
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                if (data.audioUrl) {
+                    const audio = new Audio(data.audioUrl);
+                    audio.volume = document.getElementById('volumeSlider').value;
+
+                    // Show speaking animation
+                    markAgentSpeaking(true);
+
+                    audio.onended = () => markAgentSpeaking(false);
+                    audio.onerror = () => {
+                        markAgentSpeaking(false);
+                        speakWithWebAPI(text); // Fallback
+                    };
+
+                    await audio.play();
+                }
+            } else {
+                throw new Error('ElevenLabs synthesis failed');
+            }
+        }
+
+        // Speak with Web Speech API (fallback)
+        function speakWithWebAPI(text) {
+            if ('speechSynthesis' in window) {
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.rate = document.getElementById('speedSlider').value;
+                utterance.volume = document.getElementById('volumeSlider').value;
+
+                // Set voice based on agent personality
+                const voices = speechSynthesis.getVoices();
+                if (voices.length > 0) {
+                    const voiceMap = {
+                        sophia: voices.find(v => v.name.includes('Italian') || v.name.includes('female')),
+                        marcus: voices.find(v => v.name.includes('male') && v.lang.includes('en')),
+                        isabella: voices.find(v => v.name.includes('French') || v.name.includes('female')),
+                        raj: voices.find(v => v.name.includes('male')),
+                        elena: voices.find(v => v.name.includes('female'))
+                    };
+
+                    utterance.voice = voiceMap[currentAgent.id] || voices[0];
+                }
+
+                markAgentSpeaking(true);
+                utterance.onend = () => markAgentSpeaking(false);
+
+                speechSynthesis.speak(utterance);
+            }
+        }
+
+        // Test speak function
+        function testSpeak() {
+            if (!currentAgent) return;
+
+            const testMessages = {
+                sophia: "Perfetto! The flavors are perfectly balanced, just like a beautiful symphony!",
+                marcus: "I'm here to ensure every detail of your experience exceeds your expectations.",
+                isabella: "Ah, this wine has notes of blackcurrant with a hint of oak - magnifique!",
+                raj: "Let me tell you about this fusion dish that combines traditional spices with modern techniques.",
+                elena: "I've crafted this dessert with layers of flavor that will dance on your palate."
+            };
+
+            const message = testMessages[currentAgent.id] || "Hello! How can I help you today?";
+            addMessage('agent', message);
+            speakText(message);
+        }
+
+        // Mark agent as speaking
+        function markAgentSpeaking(speaking) {
+            const activeCard = document.querySelector('.agent-card.active');
+            if (activeCard) {
+                if (speaking) {
+                    activeCard.classList.add('speaking');
+                    updateVoiceStatus('Speaking...');
+                } else {
+                    activeCard.classList.remove('speaking');
+                    updateVoiceStatus('Ready to listen');
+                }
+            }
+        }
+
+        // Update voice status
+        function updateVoiceStatus(status) {
+            document.getElementById('voiceStatus').textContent = status;
+        }
+
+        // Update emotional state
+        function updateEmotionalState(emotion) {
+            const emotions = {
+                welcoming: '😊 Welcoming',
+                positive: '😄 Positive',
+                thinking: '🤔 Thinking',
+                confused: '😕 Confused',
+                excited: '🤩 Excited',
+                calm: '😌 Calm',
+                professional: '👔 Professional'
+            };
+
+            document.getElementById('emotionValue').textContent = emotions[emotion] || '😊 Welcoming';
+        }
+
+        // Get current emotional state
+        function getCurrentEmotionalState() {
+            const emotionText = document.getElementById('emotionValue').textContent;
+            return emotionText.split(' ')[1]?.toLowerCase() || 'welcoming';
+        }
+
+        // Start audio visualizer
+        function startVisualizer() {
+            const bars = document.querySelectorAll('.visualizer-bar');
+
+            const animate = () => {
+                if (isListening) {
+                    bars.forEach(bar => {
+                        const height = Math.random() * 40 + 5;
+                        bar.style.height = height + 'px';
+                    });
+                    requestAnimationFrame(animate);
+                }
+            };
+
+            animate();
+        }
+
+        // Stop audio visualizer
+        function stopVisualizer() {
+            const bars = document.querySelectorAll('.visualizer-bar');
+            bars.forEach(bar => {
+                bar.style.height = '5px';
+            });
+        }
+
+        // End conversation
+        function endConversation() {
+            currentAgent = null;
+            stopListening();
+
+            document.getElementById('conversationPanel').style.display = 'none';
+            document.querySelectorAll('.agent-card').forEach(card => card.classList.remove('active', 'speaking'));
+
+            conversationHistory = [];
+            updateVoiceStatus('Select an agent to start chatting');
+        }
+
+        // Show error message
+        function showError(message) {
+            const existing = document.querySelector('.error-message');
+            if (existing) existing.remove();
+
+            const error = document.createElement('div');
+            error.className = 'error-message';
+            error.textContent = message;
+
+            document.querySelector('.container').insertBefore(error, document.querySelector('.agents-grid'));
+
+            setTimeout(() => error.remove(), 5000);
+        }
+
+        // Event listeners for settings
+        document.getElementById('languageSelect').addEventListener('change', (e) => {
+            if (recognition) {
+                recognition.lang = e.target.value;
+            }
+        });
+
+        // Initialize speech synthesis voices
+        speechSynthesis.addEventListener('voiceschanged', () => {
+            // Voices loaded, ready to use
+        });
+
+        // Handle audio context for mobile
+        document.addEventListener('click', () => {
+            if (audioContext && audioContext.state === 'suspended') {
+                audioContext.resume();
+            }
+        });
+    </script>
+</body>
+</html>

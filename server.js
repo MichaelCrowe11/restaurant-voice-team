@@ -60,6 +60,10 @@ const predictiveEngine = new PredictiveEngine();
 import DatabaseManager from './src/database/db.js';
 const db = new DatabaseManager();
 
+// Initialize Voice Manager
+import VoiceManager from './src/voice/VoiceManager.js';
+const voiceManager = new VoiceManager();
+
 async function loadAgentConfigs() {
     try {
         const configPath = path.join(__dirname, 'convai-configs', 'all-agents.json');
@@ -316,6 +320,117 @@ app.post('/api/intelligence/learn', async (req, res) => {
     }
 });
 
+// Voice API Endpoints
+
+// Start voice conversation
+app.post('/api/voice/start', async (req, res) => {
+    const { agentId, userId = 'anonymous' } = req.body;
+    const sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
+    try {
+        const conversation = voiceManager.startConversation(sessionId, agentId, userId);
+        res.json({
+            sessionId,
+            agentId,
+            message: 'Conversation started',
+            conversation: {
+                startTime: conversation.startTime,
+                emotionalState: conversation.emotionalState
+            }
+        });
+    } catch (error) {
+        console.error('Voice conversation start error:', error);
+        res.status(500).json({ error: 'Failed to start conversation' });
+    }
+});
+
+// Process voice input
+app.post('/api/voice/speak', async (req, res) => {
+    const { sessionId, transcript, audioData } = req.body;
+
+    try {
+        const response = await voiceManager.processSpeechInput(sessionId, transcript, audioData);
+
+        // Generate audio if synthesis is requested
+        let audioResult = null;
+        if (response && response.text) {
+            const conversation = voiceManager.conversations.get(sessionId);
+            if (conversation) {
+                audioResult = await voiceManager.synthesizeSpeech(response.text, conversation.agentId);
+            }
+        }
+
+        res.json({
+            response: response.text,
+            emotion: response.emotion,
+            confidence: response.confidence,
+            audioUrl: audioResult?.audioUrl,
+            personalityFactors: response.personalityFactors,
+            timestamp: new Date().toISOString()
+        });
+
+    } catch (error) {
+        console.error('Voice processing error:', error);
+        res.status(500).json({ error: 'Failed to process voice input' });
+    }
+});
+
+// Synthesize speech for text
+app.post('/api/voice/synthesize', async (req, res) => {
+    const { text, agentId } = req.body;
+
+    try {
+        const audioResult = await voiceManager.synthesizeSpeech(text, agentId);
+
+        if (audioResult.error) {
+            return res.status(500).json({ error: audioResult.error });
+        }
+
+        res.json({
+            audioUrl: audioResult.audioUrl,
+            duration: audioResult.duration,
+            voiceId: audioResult.voiceId
+        });
+
+    } catch (error) {
+        console.error('Speech synthesis error:', error);
+        res.status(500).json({ error: 'Failed to synthesize speech' });
+    }
+});
+
+// Get conversation history
+app.get('/api/voice/conversation/:sessionId', (req, res) => {
+    const { sessionId } = req.params;
+    const conversation = voiceManager.conversations.get(sessionId);
+
+    if (!conversation) {
+        return res.status(404).json({ error: 'Conversation not found' });
+    }
+
+    res.json({
+        sessionId,
+        agentId: conversation.agentId,
+        startTime: conversation.startTime,
+        messageCount: conversation.messages.length,
+        messages: conversation.messages.slice(-10), // Last 10 messages
+        emotionalState: conversation.emotionalState,
+        context: conversation.context
+    });
+});
+
+// End conversation
+app.post('/api/voice/end/:sessionId', (req, res) => {
+    const { sessionId } = req.params;
+    const conversation = voiceManager.conversations.get(sessionId);
+
+    if (conversation) {
+        voiceManager.conversations.delete(sessionId);
+        res.json({ message: 'Conversation ended', duration: Date.now() - conversation.startTime });
+    } else {
+        res.status(404).json({ error: 'Conversation not found' });
+    }
+});
+
 // Generate agent response based on personality
 async function generateAgentResponse(agent, message) {
     // In production, this would use GPT-4 or Claude with the agent's prompt
@@ -418,26 +533,116 @@ const wss = new WebSocketServer({ port: 3001 });
 
 wss.on('connection', (ws) => {
     console.log('WebSocket client connected');
+    let currentSession = null;
 
     ws.on('message', async (data) => {
-        const message = JSON.parse(data);
+        try {
+            const message = JSON.parse(data);
 
-        if (message.type === 'agent_message') {
-            const agent = agentConfigs[message.agentId];
-            if (agent) {
-                const response = await generateAgentResponse(agent, message.content);
-                ws.send(JSON.stringify({
-                    type: 'agent_response',
-                    agentId: message.agentId,
-                    response: response
-                }));
+            switch(message.type) {
+                case 'voice_start':
+                    try {
+                        const sessionId = `ws_session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+                        const conversation = voiceManager.startConversation(sessionId, message.agentId, message.userId || 'websocket_user');
+                        currentSession = sessionId;
+
+                        ws.send(JSON.stringify({
+                            type: 'voice_started',
+                            sessionId,
+                            agentId: message.agentId,
+                            emotionalState: conversation.emotionalState
+                        }));
+                    } catch (error) {
+                        ws.send(JSON.stringify({
+                            type: 'error',
+                            message: 'Failed to start voice session'
+                        }));
+                    }
+                    break;
+
+                case 'voice_input':
+                    if (!currentSession) {
+                        ws.send(JSON.stringify({
+                            type: 'error',
+                            message: 'No active voice session'
+                        }));
+                        break;
+                    }
+
+                    try {
+                        const response = await voiceManager.processSpeechInput(
+                            currentSession,
+                            message.transcript,
+                            message.audioData
+                        );
+
+                        const conversation = voiceManager.conversations.get(currentSession);
+                        let audioResult = null;
+
+                        if (conversation && response.text) {
+                            audioResult = await voiceManager.synthesizeSpeech(response.text, conversation.agentId);
+                        }
+
+                        ws.send(JSON.stringify({
+                            type: 'voice_response',
+                            sessionId: currentSession,
+                            response: response.text,
+                            emotion: response.emotion,
+                            confidence: response.confidence,
+                            audioUrl: audioResult?.audioUrl,
+                            personalityFactors: response.personalityFactors,
+                            timestamp: new Date().toISOString()
+                        }));
+
+                    } catch (error) {
+                        ws.send(JSON.stringify({
+                            type: 'error',
+                            message: 'Failed to process voice input'
+                        }));
+                    }
+                    break;
+
+                case 'agent_message':
+                    const agent = agentConfigs[message.agentId];
+                    if (agent) {
+                        const response = await generateAgentResponse(agent, message.content);
+                        ws.send(JSON.stringify({
+                            type: 'agent_response',
+                            agentId: message.agentId,
+                            response: response
+                        }));
+                    }
+                    break;
+
+                default:
+                    ws.send(JSON.stringify({
+                        type: 'error',
+                        message: 'Unknown message type'
+                    }));
             }
+        } catch (error) {
+            console.error('WebSocket error:', error);
+            ws.send(JSON.stringify({
+                type: 'error',
+                message: 'Invalid message format'
+            }));
         }
     });
 
     ws.on('close', () => {
         console.log('WebSocket client disconnected');
+        if (currentSession) {
+            voiceManager.conversations.delete(currentSession);
+        }
     });
+
+    // Send welcome message
+    ws.send(JSON.stringify({
+        type: 'connected',
+        message: 'Connected to Restaurant Voice Agents',
+        features: ['voice_chat', 'real_time_updates'],
+        timestamp: new Date().toISOString()
+    }));
 });
 
 // Health check
@@ -478,7 +683,16 @@ async function startServer() {
 ║  POST /api/intelligence/anomaly - Detect anomalies                            ║
 ║  POST /api/intelligence/learn - Record agent learning                         ║
 ║                                                                               ║
-║  Web Interface: http://localhost:${PORT}/test-voice-agents.html                 ║
+║  Voice Features:                                                              ║
+║  POST /api/voice/start - Start voice conversation                             ║
+║  POST /api/voice/speak - Process speech input                                 ║
+║  POST /api/voice/synthesize - Generate speech audio                           ║
+║  GET  /api/voice/conversation/:id - Get conversation history                  ║
+║                                                                               ║
+║  Web Interfaces:                                                              ║
+║  🎤 Voice Chat: http://localhost:${PORT}/voice-chat.html                      ║
+║  🧠 Intelligence: http://localhost:${PORT}/intelligence-dashboard.html        ║
+║  🧪 Agent Testing: http://localhost:${PORT}/test-voice-agents.html            ║
 ║                                                                               ║
 ╚═══════════════════════════════════════════════════════════════════════════════╝
         `);

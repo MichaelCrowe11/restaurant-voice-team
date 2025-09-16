@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎭 Voice Demo Scenarios - Restaurant Agents</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .scenarios-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .scenario-card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .scenario-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+
+        .scenario-card.active {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+        }
+
+        .scenario-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .scenario-icon {
+            font-size: 3em;
+            margin-right: 20px;
+        }
+
+        .scenario-title {
+            font-size: 1.5em;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .scenario-subtitle {
+            opacity: 0.8;
+            font-size: 0.9em;
+        }
+
+        .scenario-description {
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+
+        .scenario-agents {
+            margin-bottom: 20px;
+        }
+
+        .agent-chip {
+            display: inline-block;
+            background: #f0f0f0;
+            color: #333;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 0.8em;
+            margin: 2px;
+        }
+
+        .scenario-card.active .agent-chip {
+            background: rgba(255,255,255,0.2);
+            color: white;
+        }
+
+        .scenario-scripts {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 15px;
+        }
+
+        .scenario-card.active .scenario-scripts {
+            background: rgba(255,255,255,0.1);
+        }
+
+        .script-line {
+            margin-bottom: 10px;
+            padding: 8px;
+            border-radius: 8px;
+            background: white;
+            border-left: 4px solid #667eea;
+        }
+
+        .scenario-card.active .script-line {
+            background: rgba(255,255,255,0.9);
+            color: #333;
+        }
+
+        .speaker {
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 3px;
+        }
+
+        .demo-controls {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+            text-align: center;
+        }
+
+        .control-button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            margin: 10px;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .control-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+        }
+
+        .control-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .status-display {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            font-family: monospace;
+            text-align: left;
+        }
+
+        .personality-showcase {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .personality-card {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .personality-card:hover {
+            background: #e9ecef;
+            transform: scale(1.02);
+        }
+
+        .personality-avatar {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .personality-name {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .personality-trait {
+            font-size: 0.8em;
+            color: #666;
+            margin: 2px;
+        }
+
+        .demo-explanation {
+            background: rgba(255,255,255,0.1);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            color: white;
+            text-align: center;
+        }
+
+        .feature-highlight {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+
+        .feature-highlight.intelligence {
+            background: #d1ecf1;
+            border-color: #bee5eb;
+        }
+
+        .feature-highlight.personality {
+            background: #f8d7da;
+            border-color: #f5c6cb;
+        }
+
+        @media (max-width: 768px) {
+            .scenarios-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎭 Voice Demo Scenarios</h1>
+
+        <div class="demo-explanation">
+            <h3>🚀 Experience Restaurant AI in Action</h3>
+            <p>Choose a scenario below to see how our AI agents handle real restaurant situations with authentic personalities, emotional intelligence, and predictive capabilities.</p>
+        </div>
+
+        <div class="scenarios-grid">
+            <!-- Happy Birthday Surprise -->
+            <div class="scenario-card" onclick="selectScenario('birthday')">
+                <div class="scenario-header">
+                    <div class="scenario-icon">🎂</div>
+                    <div>
+                        <div class="scenario-title">Birthday Surprise</div>
+                        <div class="scenario-subtitle">Emotional Intelligence & Memory</div>
+                    </div>
+                </div>
+                <div class="scenario-description">
+                    A regular customer mentions it's their birthday. Watch how Marcus coordinates with Elena to create a magical moment while Sophia ensures everything is perfect.
+                </div>
+                <div class="scenario-agents">
+                    <span class="agent-chip">👨‍💼 Marcus (Host)</span>
+                    <span class="agent-chip">🧁 Elena (Pastry)</span>
+                    <span class="agent-chip">👩‍🍳 Sophia (Chef)</span>
+                </div>
+                <div class="scenario-scripts">
+                    <div class="script-line">
+                        <div class="speaker">Customer:</div>
+                        "Actually, it's my birthday today!"
+                    </div>
+                    <div class="script-line">
+                        <div class="speaker">Marcus:</div>
+                        "What wonderful news! Let me coordinate something special..."
+                    </div>
+                </div>
+                <div class="feature-highlight intelligence">
+                    <strong>AI Features:</strong> Customer memory, cross-agent coordination, predictive surprise planning
+                </div>
+            </div>
+
+            <!-- Dietary Restriction Challenge -->
+            <div class="scenario-card" onclick="selectScenario('dietary')">
+                <div class="scenario-header">
+                    <div class="scenario-icon">🥗</div>
+                    <div>
+                        <div class="scenario-title">Dietary Challenge</div>
+                        <div class="scenario-subtitle">Problem Solving & Creativity</div>
+                    </div>
+                </div>
+                <div class="scenario-description">
+                    A customer reveals multiple dietary restrictions after ordering. See how Raj's creativity and Sophia's expertise create a perfect solution on the spot.
+                </div>
+                <div class="scenario-agents">
+                    <span class="agent-chip">👨‍🍳 Raj (Sous Chef)</span>
+                    <span class="agent-chip">👩‍🍳 Sophia (Head Chef)</span>
+                    <span class="agent-chip">👨‍💼 Marcus (Host)</span>
+                </div>
+                <div class="scenario-scripts">
+                    <div class="script-line">
+                        <div class="speaker">Customer:</div>
+                        "I just remembered I'm gluten-free AND vegan..."
+                    </div>
+                    <div class="script-line">
+                        <div class="speaker">Raj:</div>
+                        "No problem! I have an amazing fusion idea that's even better..."
+                    </div>
+                </div>
+                <div class="feature-highlight personality">
+                    <strong>Personality Traits:</strong> Raj's innovation (Openness: 0.85), Sophia's quality control (Conscientiousness: 0.95)
+                </div>
+            </div>
+
+            <!-- Wine Pairing Education -->
+            <div class="scenario-card" onclick="selectScenario('wine')">
+                <div class="scenario-header">
+                    <div class="scenario-icon">🍷</div>
+                    <div>
+                        <div class="scenario-title">Wine Education</div>
+                        <div class="scenario-subtitle">Sophisticated Knowledge Sharing</div>
+                    </div>
+                </div>
+                <div class="scenario-description">
+                    A curious customer wants to learn about wine. Experience Isabella's elegant French approach to education and her sophisticated pairing expertise.
+                </div>
+                <div class="scenario-agents">
+                    <span class="agent-chip">🍷 Isabella (Sommelier)</span>
+                    <span class="agent-chip">👩‍🍳 Sophia (Chef)</span>
+                </div>
+                <div class="scenario-scripts">
+                    <div class="script-line">
+                        <div class="speaker">Customer:</div>
+                        "I don't know much about wine. Can you teach me?"
+                    </div>
+                    <div class="script-line">
+                        <div class="speaker">Isabella:</div>
+                        "Ah, magnifique! Wine is poetry in a bottle..."
+                    </div>
+                </div>
+                <div class="feature-highlight intelligence">
+                    <strong>Cultural Intelligence:</strong> French expressions, sophisticated vocabulary, educational approach
+                </div>
+            </div>
+
+            <!-- Kitchen Crisis Management -->
+            <div class="scenario-card" onclick="selectScenario('crisis')">
+                <div class="scenario-header">
+                    <div class="scenario-icon">🔥</div>
+                    <div>
+                        <div class="scenario-title">Kitchen Crisis</div>
+                        <div class="scenario-subtitle">Stress Response & Leadership</div>
+                    </div>
+                </div>
+                <div class="scenario-description">
+                    The kitchen equipment breaks during rush hour. Watch how Sophia's passionate Italian temperament handles crisis while Marcus manages customer expectations.
+                </div>
+                <div class="scenario-agents">
+                    <span class="agent-chip">👩‍🍳 Sophia (Chef)</span>
+                    <span class="agent-chip">👨‍💼 Marcus (Host)</span>
+                    <span class="agent-chip">👨‍🍳 Raj (Sous Chef)</span>
+                </div>
+                <div class="scenario-scripts">
+                    <div class="script-line">
+                        <div class="speaker">System Alert:</div>
+                        "Kitchen equipment failure detected"
+                    </div>
+                    <div class="script-line">
+                        <div class="speaker">Sophia:</div>
+                        "Madonna mia! Not tonight! But we adapt..."
+                    </div>
+                </div>
+                <div class="feature-highlight personality">
+                    <strong>Stress Response:</strong> Sophia's passionate intensity (Neuroticism: 0.55), Marcus's calm stability (Neuroticism: 0.25)
+                </div>
+            </div>
+
+            <!-- Romantic Anniversary -->
+            <div class="scenario-card" onclick="selectScenario('romance')">
+                <div class="scenario-header">
+                    <div class="scenario-icon">💕</div>
+                    <div>
+                        <div class="scenario-title">Anniversary Romance</div>
+                        <div class="scenario-subtitle">Emotional Orchestration</div>
+                    </div>
+                </div>
+                <div class="scenario-description">
+                    A couple celebrates their 10th anniversary. See how the team creates a memorable evening with coordinated service, perfect ambiance, and thoughtful touches.
+                </div>
+                <div class="scenario-agents">
+                    <span class="agent-chip">👨‍💼 Marcus (Host)</span>
+                    <span class="agent-chip">🍷 Isabella (Sommelier)</span>
+                    <span class="agent-chip">🧁 Elena (Pastry)</span>
+                </div>
+                <div class="scenario-scripts">
+                    <div class="script-line">
+                        <div class="speaker">Customer:</div>
+                        "This is where we had our first date 10 years ago"
+                    </div>
+                    <div class="script-line">
+                        <div class="speaker">Marcus:</div>
+                        "How beautiful! Let me make this evening unforgettable..."
+                    </div>
+                </div>
+                <div class="feature-highlight intelligence">
+                    <strong>Memory System:</strong> Relationship tracking, milestone recognition, coordinated surprise planning
+                </div>
+            </div>
+
+            <!-- Cultural Food Journey -->
+            <div class="scenario-card" onclick="selectScenario('cultural')">
+                <div class="scenario-header">
+                    <div class="scenario-icon">🌍</div>
+                    <div>
+                        <div class="scenario-title">Cultural Journey</div>
+                        <div class="scenario-subtitle">Multi-Cultural Intelligence</div>
+                    </div>
+                </div>
+                <div class="scenario-description">
+                    International guests want authentic cultural experiences. Watch how each agent's cultural background creates an immersive culinary journey.
+                </div>
+                <div class="scenario-agents">
+                    <span class="agent-chip">👩‍🍳 Sophia (Italian)</span>
+                    <span class="agent-chip">🍷 Isabella (French)</span>
+                    <span class="agent-chip">👨‍🍳 Raj (Indian)</span>
+                    <span class="agent-chip">🧁 Elena (Spanish)</span>
+                </div>
+                <div class="scenario-scripts">
+                    <div class="script-line">
+                        <div class="speaker">Customer:</div>
+                        "We want to experience authentic flavors from different cultures"
+                    </div>
+                    <div class="script-line">
+                        <div class="speaker">Sophia:</div>
+                        "Fantastico! Let me start with a taste of Bella Italia..."
+                    </div>
+                </div>
+                <div class="feature-highlight intelligence">
+                    <strong>Cultural AI:</strong> Authentic accents, cultural expressions, traditional knowledge
+                </div>
+            </div>
+        </div>
+
+        <div class="demo-controls">
+            <h3>🎬 Demo Controls</h3>
+            <p>Select a scenario above, then use these controls to experience the AI interaction</p>
+
+            <div>
+                <button class="control-button" onclick="startDemo()" id="startBtn">▶️ Start Demo</button>
+                <button class="control-button" onclick="pauseDemo()" id="pauseBtn" disabled>⏸️ Pause</button>
+                <button class="control-button" onclick="resetDemo()" id="resetBtn">🔄 Reset</button>
+                <button class="control-button" onclick="openVoiceChat()">🎤 Live Voice Chat</button>
+            </div>
+
+            <div class="status-display" id="statusDisplay">
+                Select a scenario to begin the demo
+            </div>
+        </div>
+
+        <div class="personality-showcase">
+            <div class="personality-card" onclick="showPersonalityDetails('sophia')">
+                <div class="personality-avatar">👩‍🍳</div>
+                <div class="personality-name">Sophia Romano</div>
+                <div class="personality-trait">Italian Head Chef</div>
+                <div class="personality-trait">Passionate • Perfectionist</div>
+                <div class="personality-trait">Conscientiousness: 0.95</div>
+            </div>
+
+            <div class="personality-card" onclick="showPersonalityDetails('marcus')">
+                <div class="personality-avatar">👨‍💼</div>
+                <div class="personality-name">Marcus Washington</div>
+                <div class="personality-trait">Front Manager</div>
+                <div class="personality-trait">Empathetic • Leader</div>
+                <div class="personality-trait">Agreeableness: 0.90</div>
+            </div>
+
+            <div class="personality-card" onclick="showPersonalityDetails('isabella')">
+                <div class="personality-avatar">🍷</div>
+                <div class="personality-name">Isabella Dubois</div>
+                <div class="personality-trait">French Sommelier</div>
+                <div class="personality-trait">Sophisticated • Educator</div>
+                <div class="personality-trait">Openness: 0.90</div>
+            </div>
+
+            <div class="personality-card" onclick="showPersonalityDetails('raj')">
+                <div class="personality-avatar">👨‍🍳</div>
+                <div class="personality-name">Raj Patel</div>
+                <div class="personality-trait">Innovative Sous Chef</div>
+                <div class="personality-trait">Creative • Enthusiastic</div>
+                <div class="personality-trait">Openness: 0.85</div>
+            </div>
+
+            <div class="personality-card" onclick="showPersonalityDetails('elena')">
+                <div class="personality-avatar">🧁</div>
+                <div class="personality-name">Elena Vasquez</div>
+                <div class="personality-trait">Spanish Pastry Chef</div>
+                <div class="personality-trait">Artistic • Precise</div>
+                <div class="personality-trait">Conscientiousness: 0.90</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentScenario = null;
+        let demoPlaying = false;
+        let demoStep = 0;
+
+        const scenarios = {
+            birthday: {
+                title: "Birthday Surprise Orchestration",
+                steps: [
+                    { agent: "marcus", text: "I notice from our customer database this is your birthday! How wonderful!", type: "recognition" },
+                    { agent: "marcus", text: "Let me coordinate with our team to make this special...", type: "coordination" },
+                    { agent: "elena", text: "¡Qué maravilloso! I'll create a special birthday dessert with your favorite flavors!", type: "creative" },
+                    { agent: "sophia", text: "Perfetto! I'll prepare your favorite dish with extra care and presentation!", type: "quality" },
+                    { agent: "marcus", text: "Everything is coordinated. Your celebration will be magical!", type: "orchestration" }
+                ]
+            },
+            dietary: {
+                title: "Dietary Challenge Solution",
+                steps: [
+                    { agent: "raj", text: "No worries at all! This gives me a chance to showcase some incredible fusion alternatives!", type: "enthusiasm" },
+                    { agent: "sophia", text: "In my kitchen, we always have options. Let me ensure everything is prepared safely.", type: "safety" },
+                    { agent: "raj", text: "I'm thinking a quinoa-based dish with roasted vegetables and my special spice blend...", type: "innovation" },
+                    { agent: "sophia", text: "Raj, use the dedicated gluten-free prep area. I'll personally oversee quality.", type: "quality_control" },
+                    { agent: "marcus", text: "You're in excellent hands. This will be even better than your original order!", type: "reassurance" }
+                ]
+            },
+            wine: {
+                title: "Wine Education Experience",
+                steps: [
+                    { agent: "isabella", text: "Ah, magnifique! Wine is a journey through terroir and tradition. Let me guide you...", type: "education" },
+                    { agent: "isabella", text: "This Burgundian Pinot Noir tells the story of limestone soils and morning mists...", type: "storytelling" },
+                    { agent: "isabella", text: "Notice how the tannins dance with the acidity, creating perfect harmony...", type: "technical" },
+                    { agent: "sophia", text: "Isabella, what would pair beautifully with tonight's osso buco?", type: "collaboration" },
+                    { agent: "isabella", text: "Formidable question! The wine's earthy notes will elevate the marrow's richness...", type: "pairing" }
+                ]
+            },
+            crisis: {
+                title: "Kitchen Crisis Management",
+                steps: [
+                    { agent: "sophia", text: "Madonna mia! The main oven is down, but we don't panic in my kitchen!", type: "crisis_response" },
+                    { agent: "marcus", text: "I'll inform guests about slight delays and offer complimentary appetizers.", type: "customer_management" },
+                    { agent: "raj", text: "Sophia, I can adapt the menu to use our wood-fired grill and stovetop!", type: "problem_solving" },
+                    { agent: "sophia", text: "Perfetto! We turn this crisis into opportunity. The grill will add beautiful flavors!", type: "adaptation" },
+                    { agent: "marcus", text: "Crisis averted! Our guests are actually excited about the special preparation!", type: "success" }
+                ]
+            },
+            romance: {
+                title: "Anniversary Romance Orchestration",
+                steps: [
+                    { agent: "marcus", text: "Ten years! Let me create an evening that honors your beautiful journey together.", type: "emotional_intelligence" },
+                    { agent: "isabella", text: "For this celebration, I suggest a wine that develops complexity over time, like your love.", type: "symbolism" },
+                    { agent: "elena", text: "I'll design a dessert that represents your decade together - layers of sweet memories!", type: "artistic_creation" },
+                    { agent: "sophia", text: "The dish will be prepared with the same love and care you've shared these ten years.", type: "sentiment" },
+                    { agent: "marcus", text: "Every detail has been arranged. Tonight, we celebrate your love story.", type: "orchestration" }
+                ]
+            },
+            cultural: {
+                title: "Multi-Cultural Culinary Journey",
+                steps: [
+                    { agent: "sophia", text: "Ciao! Let me start your journey with authentic Italian flavors from my nonna's recipes!", type: "cultural_pride" },
+                    { agent: "isabella", text: "Ensuite, we explore the French countryside through carefully selected wines and cheeses.", type: "cultural_transition" },
+                    { agent: "raj", text: "Then, we journey to India with spices that tell stories of ancient trade routes!", type: "cultural_storytelling" },
+                    { agent: "elena", text: "Finally, we end in España with desserts inspired by Moorish and Mediterranean influences.", type: "cultural_fusion" },
+                    { agent: "marcus", text: "Each agent brings authentic cultural knowledge, creating a true global experience.", type: "coordination" }
+                ]
+            }
+        };
+
+        function selectScenario(scenarioId) {
+            // Remove active class from all cards
+            document.querySelectorAll('.scenario-card').forEach(card => {
+                card.classList.remove('active');
+            });
+
+            // Add active class to selected card
+            event.currentTarget.classList.add('active');
+
+            currentScenario = scenarioId;
+            demoStep = 0;
+
+            updateStatus(`Scenario selected: ${scenarios[scenarioId].title}`);
+
+            // Enable start button
+            document.getElementById('startBtn').disabled = false;
+        }
+
+        function startDemo() {
+            if (!currentScenario) {
+                alert('Please select a scenario first!');
+                return;
+            }
+
+            demoPlaying = true;
+            demoStep = 0;
+
+            document.getElementById('startBtn').disabled = true;
+            document.getElementById('pauseBtn').disabled = false;
+
+            updateStatus(`Starting demo: ${scenarios[currentScenario].title}`);
+
+            playDemoStep();
+        }
+
+        function playDemoStep() {
+            if (!demoPlaying || !currentScenario) return;
+
+            const scenario = scenarios[currentScenario];
+            const step = scenario.steps[demoStep];
+
+            if (!step) {
+                // Demo finished
+                demoPlaying = false;
+                document.getElementById('startBtn').disabled = false;
+                document.getElementById('pauseBtn').disabled = true;
+                updateStatus('Demo completed! Click reset to try again or select a new scenario.');
+                return;
+            }
+
+            // Display current step
+            updateStatus(`
+[${step.agent.toUpperCase()}] ${step.text}
+
+Type: ${step.type}
+Step ${demoStep + 1} of ${scenario.steps.length}
+
+AI Features Demonstrated:
+${getFeatureDescription(step.type)}
+            `);
+
+            demoStep++;
+
+            // Continue to next step after 4 seconds
+            setTimeout(() => {
+                if (demoPlaying) {
+                    playDemoStep();
+                }
+            }, 4000);
+        }
+
+        function pauseDemo() {
+            demoPlaying = false;
+            document.getElementById('startBtn').disabled = false;
+            document.getElementById('pauseBtn').disabled = true;
+            updateStatus('Demo paused. Click start to continue.');
+        }
+
+        function resetDemo() {
+            demoPlaying = false;
+            demoStep = 0;
+            document.getElementById('startBtn').disabled = currentScenario ? false : true;
+            document.getElementById('pauseBtn').disabled = true;
+
+            if (currentScenario) {
+                updateStatus(`Scenario ready: ${scenarios[currentScenario].title}`);
+            } else {
+                updateStatus('Select a scenario to begin the demo');
+            }
+        }
+
+        function openVoiceChat() {
+            window.open('/voice-chat.html', '_blank');
+        }
+
+        function showPersonalityDetails(agentId) {
+            const personalities = {
+                sophia: {
+                    name: "Sophia Romano",
+                    description: "Italian Head Chef with passionate perfectionism",
+                    traits: "High conscientiousness (0.95) drives quality standards. Moderate neuroticism (0.55) shows passionate Italian temperament. Uses authentic Italian expressions and culinary expertise.",
+                    specialties: "Quality control, traditional Italian cuisine, kitchen leadership, ingredient expertise"
+                },
+                marcus: {
+                    name: "Marcus Washington",
+                    description: "Front-of-house manager with exceptional emotional intelligence",
+                    traits: "High extraversion (0.85) and agreeableness (0.90) make him perfect for guest relations. Low neuroticism (0.25) ensures calm under pressure.",
+                    specialties: "Customer service, conflict resolution, team coordination, hospitality excellence"
+                },
+                isabella: {
+                    name: "Isabella Dubois",
+                    description: "French sommelier with sophisticated cultural knowledge",
+                    traits: "Highest openness (0.90) drives wine expertise and cultural appreciation. French expressions and elegant communication style.",
+                    specialties: "Wine knowledge, food pairing, cultural education, refined service"
+                },
+                raj: {
+                    name: "Raj Patel",
+                    description: "Innovative sous chef specializing in fusion cuisine",
+                    traits: "High openness (0.85) fuels creativity. High agreeableness (0.80) makes him collaborative. Enthusiastic and innovative approach.",
+                    specialties: "Fusion cuisine, spice knowledge, creative problem-solving, technique innovation"
+                },
+                elena: {
+                    name: "Elena Vasquez",
+                    description: "Spanish pastry chef with artistic precision",
+                    traits: "Highest openness (0.95) drives artistic creativity. High conscientiousness (0.90) ensures precise execution. Gentle but passionate about craft.",
+                    specialties: "Pastry arts, dessert design, artistic presentation, sweet innovation"
+                }
+            };
+
+            const agent = personalities[agentId];
+            alert(`${agent.name}\n\n${agent.description}\n\nPersonality Traits:\n${agent.traits}\n\nSpecialties:\n${agent.specialties}`);
+        }
+
+        function updateStatus(message) {
+            document.getElementById('statusDisplay').textContent = message;
+        }
+
+        function getFeatureDescription(type) {
+            const descriptions = {
+                recognition: "Customer memory system, data persistence, personalization",
+                coordination: "Cross-agent communication, task delegation, workflow orchestration",
+                creative: "Personality-driven responses, cultural expressions, innovation",
+                quality: "Conscientiousness trait expression, perfectionist behavior",
+                orchestration: "Multi-agent coordination, emotional intelligence, experience design",
+                enthusiasm: "Extraversion trait expression, positive emotional contagion",
+                safety: "Risk assessment, procedural knowledge, safety protocols",
+                innovation: "Openness trait expression, creative problem-solving",
+                quality_control: "Leadership behavior, expertise application",
+                reassurance: "Agreeableness trait expression, customer confidence building",
+                education: "Knowledge sharing, sophisticated communication",
+                storytelling: "Cultural intelligence, narrative ability",
+                technical: "Domain expertise, professional knowledge",
+                collaboration: "Team coordination, cross-specialization",
+                pairing: "Complex knowledge application, sensory expertise",
+                crisis_response: "Stress management, leadership under pressure",
+                customer_management: "Service recovery, expectation management",
+                problem_solving: "Adaptive thinking, resource optimization",
+                adaptation: "Resilience, opportunity creation from challenges",
+                success: "Positive outcome achievement, customer satisfaction",
+                emotional_intelligence: "Emotional reading, empathy, appropriate response",
+                symbolism: "Abstract thinking, meaningful connections",
+                artistic_creation: "Creativity expression, personalized design",
+                sentiment: "Emotional attunement, heartfelt expression",
+                cultural_pride: "Cultural identity expression, authentic knowledge",
+                cultural_transition: "Smooth cultural bridging, educational flow",
+                cultural_storytelling: "Historical context, narrative engagement",
+                cultural_fusion: "Multi-cultural synthesis, inclusive experience"
+            };
+
+            return descriptions[type] || "Personality-driven AI response with emotional intelligence";
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            updateStatus('Welcome to Restaurant Voice Agent Demos! Select a scenario to explore AI capabilities.');
+        });
+    </script>
+</body>
+</html>
