@@ -1,0 +1,55 @@
+{
+  "name": "Restaurant Voice Agents",
+  "description": "AI-powered restaurant management team with ML-enriched personalities and predictive analytics",
+  "icon": "🍽️",
+  "repository": "https://github.com/MichaelCrowe11/restaurant-voice-team",
+  "services": [
+    {
+      "name": "restaurant-voice-agents",
+      "source": {
+        "type": "git",
+        "repo": "MichaelCrowe11/restaurant-voice-team",
+        "branch": "master"
+      },
+      "variables": {
+        "NODE_ENV": "production",
+        "ENABLE_INTELLIGENCE": "true",
+        "LOG_LEVEL": "info"
+      },
+      "secrets": [
+        "ELEVENLABS_API_KEY"
+      ],
+      "build": {
+        "command": "npm install"
+      },
+      "deploy": {
+        "command": "npm start",
+        "healthcheckPath": "/health",
+        "healthcheckTimeout": 100
+      },
+      "resources": {
+        "memory": "512MB",
+        "cpu": "0.5"
+      },
+      "scaling": {
+        "minInstances": 1,
+        "maxInstances": 5
+      }
+    }
+  ],
+  "plugins": [
+    {
+      "name": "postgresql",
+      "plan": "hobby",
+      "optional": true
+    }
+  ],
+  "environment": {
+    "NODE_ENV": "production",
+    "ENABLE_INTELLIGENCE": "true"
+  },
+  "docs": {
+    "setup": "Set your ELEVENLABS_API_KEY in the environment variables",
+    "usage": "Visit /intelligence-dashboard.html to test AI features"
+  }
+}
